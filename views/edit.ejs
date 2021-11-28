@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <title>Sakura-Orders</title>
+    <meta name="description" content="A cool thing made with Glitch" />
+    <!--<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon"> -->
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://img.icons8.com/external-vitaliy-gorbachev-fill-vitaly-gorbachev/60/000000/external-cherry-blossom-flowers-vitaliy-gorbachev-fill-vitaly-gorbachev.png"
+      type="image/x-icon"
+    />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+    <!-- import the webpage's client-side javascript file -->
+    <!--<script defer src="/client.js"></script> -->
+  </head>
+  
+  <body>
+    <header>
+      <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid d-flex align-items-center justify-content-center">
+          <a class="navbar-brand" href="/">Sakura-Orders</a>
+          <a class="m-2" href="/">ホーム</a>
+          <a class="m-2" href="/edit">編集</a>
+        </div>
+      </nav>
+    </header>
+    
+    <!--データ入力・編集 -->
+　　　　　　　　<!--Usersへの入力・編集 -->
+    <div class="container pt-3">
+      <form action="/users/addEdit" method="post">
+        <table class="table table-bordered">
+          <tbody id="nameFormArea">
+            <tr>
+              <th class="bg-light">ユーザー名</th>
+            </tr>
+          </tbody>
+        </table>
+          <input onclick="userRowAdd()" value="行追加" class="btn btn-primary">
+          <input id="nameDataAdd" type="submit" value="送信" class="btn btn-primary">
+      </form>   
+    </div>
+
+    
+    
+    <!--Menusへの入力/編集 -->
+    <div class="container">
+      <form action="" method="post">
+        <table class="table table-bordered">
+          <tbody id="menuFormArea">
+            <tr>
+              <th class="bg-light">店名</th>
+              <th class="bg-light">メニュー</th>
+              <th class="bg-light">税込価格</th>
+            </tr>
+            <tr>
+              <td><input class="form-control" type="text" name="store-names"></td>
+              <td><input class="form-control" type="text" name="menus"></td>
+              <td><input class="form-control" type="text" name="price"></td>
+            </tr>
+            <tr>
+              <td><input class="form-control" type="text" name="store-names"></td>
+              <td><input class="form-control" type="text" name="menus"></td>
+              <td><input class="form-control" type="text" name="prices"></td>
+            </tr>
+          </tbody>
+        </table>
+        <input onclick="menuRowAdd()" value="行追加" class="btn btn-primary">
+        <input type="submit" value="送信" class="btn btn-primary">
+      </form>
+    </div>
+
+      
+    
+    <div class="container">
+      <a href="/">
+        <button class="btn btn-primary">ホーム</button>
+      </a>
+    </div>
+    <br>
+
+
+    <footer class="footer mt-auto py-3 bg-light">
+      <div
+        class="container d-flex align-items-center justify-content-center text-muted"
+      >
+        Copyright ©Sakura-Orders
+      </div>
+    </footer>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+      crossorigin="anonymous"
+    ></script>
+    
+    <script>
+      // ★editでのUsersの反映
+      fetch("/edit/getUsers", {})
+        .then(res => res.json())
+        .then(response => {
+          response.forEach(row => {
+            getUsers(row.user);
+          });
+        });
+
+      function getUsers(user) {
+        console.log(user);
+        const parent = document.getElementById("nameFormArea");
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+          input.className = "form-control";
+          input.type = "text";
+          input.name = "users";
+          input.value = user;
+        parent.appendChild(tr);
+        tr.append(td);
+        td.append(input);
+      }
+      
+      //edit ユーザー行追加
+      function userRowAdd() {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+          input.className = "form-control";
+          input.type = "text";
+          input.name = "users";
+        const parent = document.getElementById("nameFormArea");
+        parent.appendChild(tr);
+        tr.append(td);
+        td.append(input);
+      };
+      
+      //edit メニュー行追加
+      function menuRowAdd() {
+        const parent = document.getElementById("menuFormArea");
+        const tr = document.createElement("tr");
+        const td_1 = document.createElement("td");
+        const input_1 = document.createElement("input");
+          input_1.className = "form-control";
+          input_1.type = "text";
+          input_1.name = "store-names";
+        const td_2 = document.createElement("td");
+        const input_2 = document.createElement("input");
+          input_2.className = "form-control";
+          input_2.type = "text";
+          input_2.name = "menus";
+        const td_3 = document.createElement("td");
+        const input_3 = document.createElement("input");
+          input_3.className = "form-control";
+          input_3.type = "text";
+          input_3.name = "prices";
+        parent.appendChild(tr);
+        tr.append(td_1);
+        td_1.append(input_1);
+        tr.append(td_2);
+        td_2.append(input_2);
+        tr.append(td_3);
+        td_3.append(input_3);
+      }
+      
+
+    
+    </script>
+    
+    
+  </body>
+</html>
