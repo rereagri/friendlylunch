@@ -31,12 +31,12 @@
     <header>
       <nav class="navbar navbar-light bg-light">
         <div class="container-fluid d-flex align-items-center justify-content-center">
-          <a class="navbar-brand" href="/">Sakura-Orders</a>
-          <a class="m-2" href="/">ホーム</a>
-          <a class="m-2" href="/edit">編集</a>
+          <a class="navbar-brand text-muted" href="/">Sakura-Orders</a>
+          <a class="m-2 text-muted" href="/">ホーム</a>
+          <a class="m-2 text-muted" href="/edit">編集</a>
         </div>
       </nav>
-    </header>
+    </header>  
     
     <!--データ入力・編集 -->
 　　　　　　　　<!--Usersへの入力・編集 -->
@@ -62,16 +62,16 @@
         <table class="table table-bordered">
           <tbody id="menuFormArea">
             <tr>
-              <th class="bg-light">店名</th>
-              <th class="bg-light">メニュー</th>
-              <th class="bg-light">税込価格</th>
+              <th class="bg-light col-4">店名</th>
+              <th class="bg-light col-5">メニュー</th>
+              <th class="bg-light col-3">税込価格</th>
             </tr>
-            <tr>
+            <tr class="">
               <td><input class="form-control" type="text" name="store-names"></td>
               <td><input class="form-control" type="text" name="menus"></td>
               <td><input class="form-control" type="text" name="price"></td>
             </tr>
-            <tr>
+            <tr class="">
               <td><input class="form-control" type="text" name="store-names"></td>
               <td><input class="form-control" type="text" name="menus"></td>
               <td><input class="form-control" type="text" name="prices"></td>

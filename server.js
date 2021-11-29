@@ -122,57 +122,33 @@ app.get("/edit", (request, response) => {
   response.render(`${__dirname}/views/edit.ejs`);
 });
 
-// endpoint to add a dream to the database
-// app.post("/addDream", (request, response) => {
-//   console.log(`add to dreams ${request.body}`);
-
-//   // DISALLOW_WRITE is an ENV variable that gets reset for new projects so you can write to the database
-//   if (!process.env.DISALLOW_WRITE) {
-//     const cleansedDream = cleanseString(request.body.dream);
-//     db.run(`INSERT INTO Dreams (dream) VALUES (?)`, cleansedDream, error => {
+  
+// app.post("/users/addEdit", (request, response) => {
+//   const addEditUsers = request.body.users;
+//     addEditUsers.forEach(user => {
+//     db.run(`INSERT INTO Users (user) VALUES (?)`, user, error => {
 //       if (error) {
 //         response.send({ message: "error!" });
+//         // return console.log(error.message);
+//         // return response.redirect('/');
 //       } else {
-//         response.send({ message: "success" });
+//         // response.send("登録できました。ページを戻ってください。");
+//         return response.redirect('/');
+//         // return response.render(`${__dirname}/views/index.ejs`);
 //       }
-//     });
-//   }
-// });
-
-//★Usersテーブルに追加
-// app.post("/addUsers", (request, response) => {
-//   console.log(`add to Users ${request.body}`);
-//   if (!process.env.DISALLOW_WRITE) {
-//   const cleansedUsers = cleanseString(request.body.user);
-//   db.run(`INSERT INTO Users (user) VALUES (?)`, cleansedUsers, error => {
-//     if (error) {
-//       response.send({ message: "error!" });
-//     } else {
-//       response.send({ message: "success" });
-//     }
+//     })
+//   }) 
 //   });
-//   }
-// });
 
-app.post("/users/addEdit", (request, response) => {
-  // console.log(request.body.users.length);
-  request.body.users.forEach(user => {
-    console.log(user);
-    db.run(`INSERT INTO Users (user) VALUES (?)`, user, error => {
-      if (error) {
-        return console.log(error.message);
-        // return response.redirect('/');
-      } else {
-        // return console.log("add or edit success");
-        // return response.redirect('/');
-        return response.render(`${__dirname}/views/index.ejs`);
-      }
-    })
-  })
+app.post("/users/addEdit", (req, res) => {
+  const addEditUsers = req.body.users;
+    addEditUsers.forEach(user => {
+      const stmt = db.prepare("INSERT INTO Users (user) VALUES (?)");
+      stmt.run(user);
+      stmt.finalize();
+      res.render(`${__dirname}/views/index.ejs`);
+  }) 
 });
-  
-
-
 
 
 
@@ -180,3 +156,4 @@ app.post("/users/addEdit", (request, response) => {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
+
