@@ -15,7 +15,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!--     bootstrap -->
+    <!--bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -33,7 +33,7 @@
   <body>
     <header>
       <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid d-flex align-items-center justify-content-center">
+        <div class="container-fluid d-flex align-items-center justify-content-center py-2">
           <a class="navbar-brand text-muted" href="/">Sakura-Orders</a>
           <a class="m-2 text-muted" href="/">ホーム</a>
           <a class="m-2 text-muted" href="/edit">編集</a>
@@ -48,13 +48,15 @@
     </div>
 
 
+    <!--ユーザー選択-->
     <form action="" method="post" id="usersArea" class="container">
       <strong>ユーザ名</strong>
     </form>
+    
 
-    <!--アコーディオン -->
+    <!--メニュー選択アコーディオン -->
     <form action="" method="post" class="accordion container" id="accordionExample">
-      <strong>お店</strong>
+      <strong>お店＆メニュー</strong>
       
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingOne">
@@ -66,7 +68,7 @@
             aria-expanded="false"
             aria-controls="collapseOne"
           >
-            Accordion Item #1
+            さくら弁当
           </button>
         </h2>
         <div
@@ -83,7 +85,10 @@
                 id="flexCheckDefault"
               />
               <label class="form-check-label" for="flexCheckDefault">
-                Default checkbox
+                普通
+              </label>
+              <label class="form-check-label" for="flexCheckChecked">
+                500
               </label>
             </div>
             <div class="form-check">
@@ -94,7 +99,10 @@
                 id="flexCheckChecked"
               />
               <label class="form-check-label" for="flexCheckChecked">
-                Checked checkbox
+                おかずのみ
+              </label>
+              <label class="form-check-label" for="flexCheckChecked">
+                280
               </label>
             </div>
           </div>
@@ -111,7 +119,7 @@
             aria-expanded="false"
             aria-controls="collapseTwo"
           >
-            Accordion Item #2
+            青山弁当
           </button>
         </h2>
         <div
@@ -128,7 +136,10 @@
                 id="flexCheckDefault"
               />
               <label class="form-check-label" for="flexCheckDefault">
-                Default checkbox
+                日替わり
+              </label>
+              <label class="form-check-label" for="flexCheckDefault">
+                500
               </label>
             </div>
             <div class="form-check">
@@ -139,7 +150,10 @@
                 id="flexCheckChecked"
               />
               <label class="form-check-label" for="flexCheckChecked">
-                Checked checkbox
+                お楽しみ
+              </label>
+              <label class="form-check-label" for="flexCheckChecked">
+                450
               </label>
             </div>
           </div>
@@ -156,7 +170,7 @@
             aria-expanded="false"
             aria-controls="collapseThree"
           >
-            Accordion Item #3
+            やぜず
           </button>
         </h2>
         <div
@@ -173,7 +187,10 @@
                 id="flexCheckDefault"
               />
               <label class="form-check-label" for="flexCheckDefault">
-                Default checkbox
+                日替わり
+              </label>
+              <label class="form-check-label" for="flexCheckDefault">
+                500
               </label>
             </div>
             <div class="form-check">
@@ -184,7 +201,10 @@
                 id="flexCheckChecked"
               />
               <label class="form-check-label" for="flexCheckChecked">
-                Checked checkbox
+                中華弁当
+              </label>
+              <label class="form-check-label" for="flexCheckChecked">
+                500
               </label>
             </div>
           </div>
@@ -201,9 +221,10 @@
             aria-expanded="false"
             aria-controls="collapseFour"
           >
-            Accordion Item #4
+            シリザナ
           </button>
         </h2>
+        
         <div
           id="collapseFour"
           class="accordion-collapse collapse"
@@ -218,7 +239,10 @@
                 id="flexCheckDefault"
               />
               <label class="form-check-label" for="flexCheckDefault">
-                Default checkbox
+                バターチキン　ライス　５辛
+              </label>
+              <label class="form-check-label" for="flexCheckDefault">
+                500
               </label>
             </div>
             <div class="form-check">
@@ -229,45 +253,39 @@
                 id="flexCheckChecked"
               />
               <label class="form-check-label" for="flexCheckChecked">
-                Checked checkbox
+                ザグ　ナン　４辛
+              </label>
+              <label class="form-check-label" for="flexCheckChecked">
+                500
               </label>
             </div>
           </div>
         </div>
+          </div>上記にないお店とメニューは「編集」で追加してください。</div>
+        </div>
       </div>
       
     </form>
+    
+    
+    <!--お釣り入力フォーム-->
+    <form action="" method="post" id="change" class="container">
+      <strong>お釣りがある場合</strong>
+      <div class="input-group mb-3">
+        <div class="input-group-text">
+          <input class="form-check-input" type="checkbox" value="" aria-label="Checkbox for following text input">
+        </div>
+        <input type="text" class="form-control" aria-label="Text input with checkbox" placeholder="例：100（数字のみ、テキスト不可）">
+      </div>
+    </form>
+    
 
     <!--データ編集画面へ遷移 -->
     <form action="" method="post" class="container">
-      <button class="btn btn-primary">集　計</button>
+      <button class="btn btn-primary">注文確定or修正</button>
     </form>
     
     <br>
-
-
-    <!--todo-list -->
-<!--     <div class="container">
-      <p>Tell me your hopes and dreams:</p>
-      <form>
-        <input
-          name="dream"
-          aria-label="a new dream"
-          type="text"
-          maxlength="100"
-          placeholder="Dreams!"
-        />
-        <button type="submit" id="submit-dream">Submit Dream</button>
-      </form>
-      <section class="dreams">
-        <ul id="dreams"></ul>
-        <button id="clear-dreams">
-          Clear Dreams
-        </button>
-      </section>
-    </div>
-    
-    <br> -->
 
     <footer class="footer mt-auto py-3 bg-light">
       <div
@@ -281,6 +299,7 @@
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
       crossorigin="anonymous"
-    ></script>
+    ></script>  
+    
   </body>
 </html>

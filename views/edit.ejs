@@ -30,68 +30,56 @@
   <body>
     <header>
       <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid d-flex align-items-center justify-content-center">
+        <div class="container-fluid d-flex align-items-center justify-content-center py-2">
           <a class="navbar-brand text-muted" href="/">Sakura-Orders</a>
           <a class="m-2 text-muted" href="/">ホーム</a>
           <a class="m-2 text-muted" href="/edit">編集</a>
         </div>
       </nav>
     </header>  
-    
+      
     <!--データ入力・編集 -->
-　　　　　　　　<!--Usersへの入力・編集 -->
+　　　　　　　　<!--Usersの入力・編集 -->
     <div class="container pt-3">
-      <form action="/users/addEdit" method="post">
+      <form action="/users/addEdit" method="post" name = "UsersForm">
         <table class="table table-bordered">
           <tbody id="nameFormArea">
             <tr>
-              <th class="bg-light">ユーザー名</th>
+              <th class="bg-light col-3 text-center">ID</th>
+              <th class="bg-light col-8 text-center">ユーザー名</th>
+              <th class="bg-light col-1 text-center">×</th>
             </tr>
           </tbody>
         </table>
           <input onclick="userRowAdd()" value="行追加" class="btn btn-primary">
-          <input id="nameDataAdd" type="submit" value="送信" class="btn btn-primary">
+          <input id="usersDataAddEdit" type="submit" value="更新" class="btn btn-primary">
       </form>   
     </div>
 
-    
-    
     <!--Menusへの入力/編集 -->
     <div class="container">
       <form action="" method="post">
         <table class="table table-bordered">
           <tbody id="menuFormArea">
             <tr>
-              <th class="bg-light col-4">店名</th>
-              <th class="bg-light col-5">メニュー</th>
-              <th class="bg-light col-3">税込価格</th>
-            </tr>
-            <tr class="">
-              <td><input class="form-control" type="text" name="store-names"></td>
-              <td><input class="form-control" type="text" name="menus"></td>
-              <td><input class="form-control" type="text" name="price"></td>
-            </tr>
-            <tr class="">
-              <td><input class="form-control" type="text" name="store-names"></td>
-              <td><input class="form-control" type="text" name="menus"></td>
-              <td><input class="form-control" type="text" name="prices"></td>
+              <th class="bg-light col-4 text-center">店名</th>
+              <th class="bg-light col-5 text-center">メニュー</th>
+              <th class="bg-light col-2 text-center">価格</th>
+              <th class="bg-light col-1 text-center">×</th>
             </tr>
           </tbody>
         </table>
         <input onclick="menuRowAdd()" value="行追加" class="btn btn-primary">
-        <input type="submit" value="送信" class="btn btn-primary">
+        <input type="submit" value="更新" class="btn btn-primary">
       </form>
     </div>
 
-      
-    
     <div class="container">
       <a href="/">
         <button class="btn btn-primary">ホーム</button>
       </a>
     </div>
     <br>
-
 
     <footer class="footer mt-auto py-3 bg-light">
       <div
@@ -108,43 +96,108 @@
     ></script>
     
     <script>
-      // ★editでのUsersの反映
-      fetch("/edit/getUsers", {})
+      // ★editでのUsersの呼び出し
+      fetch("/edit/getUsersData", {})
         .then(res => res.json())
         .then(response => {
           response.forEach(row => {
-            getUsers(row.user);
+             getUsersData(row.id, row.user);
           });
         });
 
-      function getUsers(user) {
-        console.log(user);
+      // ★editでのUsersの反映
+      function getUsersData(id, user) {
+        // console.log(id, user);
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        const input = document.createElement("input");
-          input.className = "form-control";
-          input.type = "text";
-          input.name = "users";
-          input.value = user;
+        const td_1 = document.createElement("td");
+          td_1.name = "userTd_1";
+        const input_1 = document.createElement("input");
+          input_1.readOnly = true;
+          input_1.className = "form-control text-center";
+          input_1.type = "number";
+          input_1.name = "userId";
+          input_1.value = id;
+        const td_2 = document.createElement("td");
+        const input_2 = document.createElement("input");
+          input_2.className = "form-control";
+          input_2.type = "text";
+          input_2.name = "userName";
+          input_2.value = user;
+        const td_3 = document.createElement("td");
+        const input_3 = document.createElement("input");
+          input_3.onclick = deleteUser;　//プロパティとして追加する場合は（）は不要
+          input_3.className = "form-control btn btn-outline-secondary";
+          input_3.type = "button";
+          input_3.name = `deleteUserBtn_${id}`;
+          input_3.value =　"×";
         parent.appendChild(tr);
-        tr.append(td);
-        td.append(input);
-      }
+        tr.append(td_1);
+        td_1.append(input_1)
+        tr.append(td_2);
+        td_2.append(input_2);
+        tr.append(td_3);
+        td_3.append(input_3);
+      };
+      
       
       //edit ユーザー行追加
       function userRowAdd() {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        const input = document.createElement("input");
-          input.className = "form-control";
-          input.type = "text";
-          input.name = "users";
         const parent = document.getElementById("nameFormArea");
+        const tr = document.createElement("tr");
+        const td_1 = document.createElement("td");
+          td_1.name = "userTd_1";
+        const input_1 = document.createElement("input");
+          input_1.readOnly = true;
+          input_1.className = "form-control text-center";
+          input_1.type = "";
+          input_1.name = "userId";
+          input_1.value = maxId();
+        const td_2 = document.createElement("td");
+        const input_2 = document.createElement("input");
+          input_2.className = "form-control";
+          input_2.type = "text";
+          input_2.name = "userName";
+        const td_3 = document.createElement("td");
+        const input_3 = document.createElement("input");
+          input_3.onclick = deleteUser; //プロパティとして追加する場合は（）は不要
+          input_3.className = "form-control btn btn-outline-secondary";
+          input_3.type = "button";
+          input_3.name = `deleteUserBtn_${input_1.value}`;
+          input_3.value =　"×";
         parent.appendChild(tr);
-        tr.append(td);
-        td.append(input);
+        tr.append(td_1);
+        td_1.append(input_1)
+        tr.append(td_2);
+        td_2.append(input_2);
+        tr.append(td_3);
+        td_3.append(input_3);
       };
+      
+      
+      // idの最大値の取得
+      function maxId() {
+        const id = document.getElementsByName("userId");
+        const idAry = [];
+        for (let i = 0; i < id.length; i++) {
+          idAry.push(id[i].value);
+        };
+        console.log(idAry);
+        return parseInt(Math.max.apply(null, idAry) + 1);
+      };
+      
+      
+      // ★デリートにチェックされたidの取得
+      function deleteUser() {
+        const activeDeleteUserBtn = document.activeElement;
+        const deleteId = activeDeleteUserBtn.name.replace("deleteUserBtn_", "");
+        console.log(activeDeleteUserBtn.name);
+        console.log(activeDeleteUserBtn.name.replace("deleteUserBtn_", ""));
+        window.location.href = `/users/delete/${deleteId}`;
+      };
+
+      
+      
       
       //edit メニュー行追加
       function menuRowAdd() {
@@ -163,8 +216,14 @@
         const td_3 = document.createElement("td");
         const input_3 = document.createElement("input");
           input_3.className = "form-control";
-          input_3.type = "text";
+          input_3.type = "number";
           input_3.name = "prices";
+        const td_4 = document.createElement("td");
+        const input_4 = document.createElement("input");
+          input_4.className = "form-control btn-outline-secondary";
+          input_4.type = "button";
+          input_4.name = "deleteMenuBtn";
+          input_4.value =　"×";
         parent.appendChild(tr);
         tr.append(td_1);
         td_1.append(input_1);
@@ -172,12 +231,12 @@
         td_2.append(input_2);
         tr.append(td_3);
         td_3.append(input_3);
+        tr.append(td_4);
+        td_4.append(input_4);
       }
       
-
-    
+      
     </script>
-    
     
   </body>
 </html>
