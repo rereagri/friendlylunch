@@ -86,7 +86,7 @@ const appendMenuAccordionHeader = (id, store, menu, price) => {
   const input = document.createElement("input");
     input.className = "form-check-input";
     input.type = "checkbox";
-    input.value = store + "," + menu + "," + price;
+    input.value = store　+ "," + menu + "," + price;
     // input.value = [`${store}`, `${menu}`, `${price}`];
     input.name = "selectStoreMenuPrice"
     input.id = "flexCheckDefault";
@@ -150,10 +150,12 @@ ordersUpdateBtn.addEventListener("click", () => {
   const selectChangeValue = document.querySelectorAll("input[name=selectChangeValue]");
   const ordersAddArray = [];
   
+  //ユーザー名:0 or メニュー:0のとき どっちか一方が0のとき
   if (checked_selectUserName.length == 0 || checked_selectStoreMenuPrice.length == 0) {
     document.getElementById("errormessage").textContent = "エラー：ユーザー名・お店・メニューを選択してください。";
   };
 
+  //ユーザー名：１　 & メニュー：１のとき
   if(checked_selectStoreMenuPrice.length == 1 && checked_selectUserName.length == 1) {
     document.getElementById("errormessage").textContent = "";
     for (const data_selectUserName of checked_selectUserName) {
@@ -170,31 +172,44 @@ ordersUpdateBtn.addEventListener("click", () => {
     }
   };
 
+  //メニューが２つ以上のとき
   if(checked_selectStoreMenuPrice.length > 1 && checked_selectUserName.length == 1) {
     document.getElementById("errormessage").textContent = "";
-    console.log(checked_selectStoreMenuPrice.length); //2
+    // console.log(checked_selectStoreMenuPrice.length);
     
-    for (let i = 0; i < checked_selectStoreMenuPrice.length; i++) { //2
-      
-      
-      ordersAddArray.push(checked_selectUserName[0].value);
-      
-      for (const data_selectStoreMenuPrice of checked_selectStoreMenuPrice) {
-      const ary = data_selectStoreMenuPrice.value.split(',');
-        console.log(ary.length); //3
-        console.log(ary); //(3) ['さくら弁当', '普通', '450'] (3) ['さくら弁当', 'おかずのみ', '350']
-        for (let f = 0; f < ary.length; f++) {
-          ordersAddArray.push(ary[f]);
+    
+    for (let i = 0; i < checked_selectStoreMenuPrice.length; i++) {
+      if(i = 0) {
+        // console.log(checked_selectUserName[0].value);
+        // console.log(checked_selectStoreMenuPrice[i].value);
+        // console.log(selectChangeValue[0].value);
+        ordersAddArray.push(checked_selectUserName[0].value);
+        console.log(checked_selectStoreMenuPrice.length); //2
+        console.log(checked_selectStoreMenuPrice.value); //undefined
+        console.log(checked_selectStoreMenuPrice.length); //2
+        console.log(checked_selectStoreMenuPrice[i].value); //さくら弁当,普通,450
+        console.log(checked_selectStoreMenuPrice[i].value.split(',')); // ['さくら弁当', '普通', '450']★
+        console.log(checked_selectStoreMenuPrice[i].value.split(',')[0]); //さくら弁当 ★
+        console.log(checked_selectStoreMenuPrice[i].value.split(',').length); //3　★
+     
+        for (let h = 0; h < checked_selectStoreMenuPrice[i].value.split(',').length; h++) {
+          const splitValue_length_selectStoreMenuPrice = checked_selectStoreMenuPrice[i].value.split(',')[h];
+          console.log(checked_selectStoreMenuPrice[i].value.split(',')[h]);
+          ordersAddArray.push(checked_selectStoreMenuPrice[i].value.split(',')[h]); 
         }
+
+        ordersAddArray.push(selectChangeValue[0].value);  
+      } else if(i < checked_selectStoreMenuPrice.length) {
+        ordersAddArray.push(checked_selectUserName[0].value);
+        for (let h = 0; h < checked_selectStoreMenuPrice[i].value.split(',').length; h++) {
+          const splitValue_length_selectStoreMenuPrice = checked_selectStoreMenuPrice[i].value.split(',')[h];
+          console.log(checked_selectStoreMenuPrice[i].value.split(',')[h]);
+          ordersAddArray.push(checked_selectStoreMenuPrice[i].value.split(',')[h]); 
+        }
+        ordersAddArray.push(""); 
       }
-      
-      ordersAddArray.push(selectChangeValue[0].value); 
-      
     }
   };
-  
-
-
   console.log(ordersAddArray);
 });
 
