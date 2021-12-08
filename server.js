@@ -133,6 +133,50 @@ app.get("/menus/delete/:deleteId", (req, res) => {
   return res.render(`${__dirname}/views/edit.ejs`);
 });
 
+//Ordersテーブルの追加・更新
+app.get("/orders/update/:ordersUpdateArray", (req, res) => {
+  const ordersUpdateArray = req.params.ordersUpdateArray;
+  console.log(ordersUpdateArray); //山形　新庄,さくら弁当,普通,450,
+  // console.log(JSON.stringify(ordersUpdateArray)); 
+  // console.log(ordersUpdateArray[0]); //山
+  // console.log(JSON.stringify(ordersUpdateArray)); //"山田　太郎,さくら弁当,普通,450,"
+  const array = ordersUpdateArray.split(',');
+  // console.log(array); //[ '山田　太郎', 'さくら弁当', '普通', '450', '100' ]
+  // console.log(array[0]); //山田　太郎
+  // console.log(array);
+  // console.log(array[0]); //山
+  for (let i = 0; i < array.length; i++) {
+    if (i==0 || i % 5 == 0) {
+      const user = array[0]; 
+    };
+    if (i % 5 == 1) {
+      const store = array[1];
+    };
+    if (i % 5 == 2) {
+      const menu = array[2];
+    };
+    if (i % 5 == 3) {
+      const price = array[3];
+    };
+    if (i % 5 == 4) {
+      const change = array[4];
+    };
+    console.log(`${user}:${store}:${menu}:${price}:${change});
+    
+  }
+  // const user = array[0]; //5
+  // const store = array[1]; //6
+  // const menu = array[2];
+  // const price = array[3];
+  // const change = array[4];
+  // console.log(array.length);//5
+  // console.log(user);
+  // console.log(store);
+  // console.log(menu);
+  // console.log(price);
+  // console.log(change);
+  return res.render(`${__dirname}/views/index.ejs`);
+});
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, () => {
