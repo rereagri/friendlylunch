@@ -50,27 +50,25 @@ db.serialize(() => {
         'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", さくら弁当", "普通", "500"), ("山田　太郎", "さくら弁当", "おかずのみ", "280")'
       );
     });
-    
-  
   } else {
     console.log('Database "Users" ready to go!');
     console.log('Database "Menus" ready to go!');
     console.log('Database "Orders" ready to go!');
-    db.each("SELECT * from Users", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.user}`);
-      }
-    });
-    db.each("SELECT * from Menus", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.store}, ${row.menu}, ${row.price}`);
-      }
-    });
-    db.each("SELECT * from Orders", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.id}, ${row.date}, ${row.user}, ${row.store}, ${row.menu}, ${row.price}, ${row.change}`);
-      }
-    });
+    // db.each("SELECT * from Users", (err, row) => {
+    //   if (row) {
+    //     console.log(`record: ${row.user}`);
+    //   }
+    // });
+    // db.each("SELECT * from Menus", (err, row) => {
+    //   if (row) {
+    //     console.log(`record: ${row.store}, ${row.menu}, ${row.price}`);
+    //   }
+    // });
+    // db.each("SELECT * from Orders", (err, row) => {
+    //   if (row) {
+    //     console.log(`record: ${row.id}, ${row.date}, ${row.user}, ${row.store}, ${row.menu}, ${row.price}, ${row.change}`);
+    //   }
+    // });
   }
 });
 
@@ -108,14 +106,50 @@ app.get("/getUsersData", (request, response) => {
 
 //サーバーサイドからフロントエンドへMenusデータを送付
 app.get("/getMenusData", (request, response) => {
-  db.all("SELECT * from Menus", (err, rows) => {
+  db.all("SELECT * from Menus ORDER by store ASC, price DESC, menu ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
 //サーバーサイドからフロントエンドへOrdersデータを送付
 app.get("/getOrdersData", (request, response) => {
-  db.all("SELECT * from Orders", (err, rows) => {
+  db.all("SELECT * from Orders ORDER by date DESC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
+
+//日付 サーバーサイドでは日本時間にならないので日本時間に変換
+const today = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
+const year = today.getFullYear();
+const month = ("0" + (today.getMonth() + 1)).slice(-2); //２桁で取得する。04等
+const week = today.getDay();
+const day = ("0" + today.getDate()).slice(-2);　
+const hour = ("0" + (today.getHours())).slice(-2);
+const minute = ("0" + today.getMinutes()).slice(-2);
+//年・月・日・曜日を取得
+const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
+const thisDay = year + "-" + month + "-" + day;
+console.log(thisDay);
+
+
+// 本日の店別・合計金額  store sum
+app.get("/getTodaysStoresTotalAmount", (request, response) => {
+  db.all("SELECT store, sum(price) as sum from Orders WHERE date = '"+thisDay+"' GROUP by store ORDER by store ASC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
+// 本日の注文者とメニュー id date user store menu price change
+app.get("/getTodaysOrders", (request, response) => {
+  db.all("SELECT * from Orders WHERE date = '"+thisDay+"' ORDER by store ASC, user ASC, price DESC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
+// 本日のお釣り user change
+app.get("/getTodaysChanges", (request, response) => {
+  db.all("SELECT user, change from Orders WHERE date = '"+thisDay+"' and change is not '' ORDER by user ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -187,19 +221,9 @@ app.get("/orders/delete/:deleteId", (req, res) => {
 //Ordersテーブルの追加・更新
 app.get("/orders/update/:ordersUpdateArray", (req, res) => {
   const ordersUpdateArray = req.params.ordersUpdateArray;
-  // console.log(JSON.stringify(ordersUpdateArray)); 
-  // console.log(ordersUpdateArray[0]); //山
-  // console.log(JSON.stringify(ordersUpdateArray)); //"山田　太郎,さくら弁当,普通,450,"
   const array = ordersUpdateArray.split(',');
-  // console.log(array); //[ '山田　太郎', 'さくら弁当', '普通', '450', '100' ]
-  // console.log(array[0]); //山田　太郎
-  // console.log(array);
-  // console.log(array[0]); //山
   for (let h = 0; h < (array.length/6); h++) {
     const obj_h = {};
-    // const date = new Date(); //日時取得
-    // date.setTime(date.getTime() + 1000*60*60*9); //日本時間に変換。UTC協定世界時+9
-    // obj_h.date = date;
     for (let i = 6*h; i < 6 + 6*h; i++) {
       if (i==0 || i % 6 == 0) {
         const date = array[i];
@@ -221,17 +245,15 @@ app.get("/orders/update/:ordersUpdateArray", (req, res) => {
         const price = array[i];
         obj_h.price = price;
       }
-      if (i % 6 == 5) {
+      if (i == 5) {
         const change = array[i];
         obj_h.change = change;
       }
+      if (i > 5 && i % 6 == 5) {
+        const change_none = '';
+        obj_h.change = change_none;
+      }
     }
-  console.log("--------------------");
-  console.log(ordersUpdateArray); //山形　新庄,さくら弁当,普通,450,
-  console.log(array.length); //10
-  console.log(obj_h);
-  console.log(obj_h.user);
-  console.log(obj_h.menu);
   const stmt = db.prepare("INSERT OR REPLACE INTO Orders (date, user, store, menu, price, change) VALUES (?, ?, ?, ?, ?, ?)", obj_h.date, obj_h.user, obj_h.store, obj_h.menu, obj_h.price, obj_h.change);
     stmt.run();
     stmt.finalize();
