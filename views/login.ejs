@@ -39,23 +39,48 @@
           <a class="navbar-brand text-white" href="">Friendly Lunch</a>
         </div>
       </nav>
-    </header>  
+    </header> 
     
-    <div class="container">
-      ログインページ　作成中
+    
+    <div class="container py-5">
+      <form action="/users/authentication" method="post">
+        <div class="mb-3">
+          <table>
+            <thead>
+              <th></th>
+              <th></th>
+            </thead>
+            <tbody>
+              <tr>
+                <td height="100px">
+                  <label>アカウント：</label>
+                </td>
+                <td>
+                  <input type="text" name="username" style="width:100%;"/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>パスワード：</label>
+                </td>
+                <td>
+                  <input type="password" name="password" style="width:100%;"/>
+                </td>
+              </tr> 
+            </tbody>     
+          </table>       
+        </div>
+        <br>
+        <div>
+          <input class="btn btn-dark" type="submit" value="ログイン"/>
+        </div>
+      </form>
     </div>
+
     
-    <!--ログインbtn-->
-    <div class="container">
-      <a href="/index">
-        <button class="btn btn-dark mb-4">ログイン</button>
-      </a>
-    </div>
+    <br>
     
-    
-    
-    
-    
+      
     <footer class="footer mt-auto py-3 bg-light">
       <div
         class="container d-flex align-items-center justify-content-center text-muted"

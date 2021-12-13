@@ -1,22 +1,88 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const app = express();
 const fs = require("fs");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const bodyParser = require("body-parser");
+const flash = require('connect-flash');
+
+// middleware
 app.use(express.static("public"));
 
+// middleware related to passport
+app.use(session({ secret: 'keyboard cat' }));
+app.use(session({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: false,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 //テンプレートエンジン
 app.set('views', './views');
 app.set('view engine', 'ejs');
 
+// dotenv
+require('dotenv').config();
 
 //init sqlite db
 const dbFile = "./.data/sqlite.db";
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
+
+
+// passport
+passport.use(
+  'users-local',
+  new LocalStrategy(
+  (username, password, done) => {
+    if (username !== process.env.KEY1){
+      // Error
+      return done(null, false, { message : 'ユーザーネームに誤りがあります' });
+    } else if(password !== process.env.KEY2) {
+      // Error
+      return done(null, false, { message : 'パスワードに誤りがあります。' });
+    } else{
+      // Success and return user information.
+      return done(null, { username: username, password: password});
+    }
+  }));
+
+//passport セッション管理 passportがユーザー情報をシリアライズすると呼び出される
+passport.serializeUser((user, done) => {
+  console.log('Serialize ...');
+  done(null, user);
+});
+
+//passportがユーザー情報をデシリアライズすると呼び出される。
+passport.deserializeUser((user, done) => {
+  console.log('Deserialize ...');
+  done(null, user);
+});
+
+//passport ログインしていないと（isAuthenticatedがないと）そのページに遷移できない
+function isAuthenticated(req, res, next) {
+  const auth = req.isAuthenticated();
+  if (auth !== true) {
+    res.send('ログインしてください');
+  } else {
+    const auth = req.isAuthenticated();
+    console.log(auth);
+    const userName = process.env.KEY1;
+    if(userName == null) {
+      res.send('ログインしてください');
+    } else {
+      return next();
+    }};
+  } 
 
 
 //if ./.data/sqlite.db does not exist, create it, otherwise print records to console
@@ -78,22 +144,50 @@ app.get("/", (req, res) => {
   res.render(`${__dirname}/views/login.ejs`);
 });
 
+//ログイン認証
+app.post('/users/authentication',
+  passport.authenticate('users-local',
+    {
+      failureRedirect : '/users/failure',
+      successRedirect : '/users/success',
+      failureFlash: true
+    }
+  )
+);
+
+//ログイン失敗
+app.get('/users/failure', (req, res) => {
+  console.log(req.session);
+  res.render(`${__dirname}/views/login.ejs`, { message: req.flash( "error" ), login_people: req.user});
+});
+
+//申請側 ログイン成功
+app.get('/users/success', (req, res) => {
+  console.log(req.session);
+  res.render(`${__dirname}/views/index.ejs`);
+});
+
+//ログアウト
+// app.post('/logout', (req, res) => {
+//   req.session.passport.user = undefined;
+//   res.render(`${__dirname}/views/login.ejs`);
+// });
 
 // インデックスページへの遷移
-app.get("/index", (request, response) => {
-  response.render(`${__dirname}/views/index.ejs`);
+app.get("/index", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/index.ejs`, { login_people: req.user });
 });
 
 
 // 実績ページへの遷移
-app.get("/records", (req, res) => {
-  res.render(`${__dirname}/views/records.ejs`);
+app.get("/records", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/records.ejs`, { login_people: req.user });
 });
 
 
 // 編集ページへの遷移
-app.get("/edit", (request, response) => {
-  response.render(`${__dirname}/views/edit.ejs`);
+app.get("/edit", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/edit.ejs`, { login_people: req.user });
 });
 
 
