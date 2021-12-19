@@ -97,7 +97,7 @@ db.serialize(() => {
     );
     console.log("New table Menus created!");
     db.run(
-      "CREATE TABLE Orders (id INTEGER PRIMARY KEY AUTOINCREMENT,date TEXT, user TEXT, store TEXT, menu TEXT, price INTEGER, change INTEGER)"
+      "CREATE TABLE Orders (id INTEGER PRIMARY KEY AUTOINCREMENT,date TEXT, user TEXT, store TEXT, menu TEXT, price INTEGER, change INTEGER, ordered_check TEXT, changed_check TEXT)"
     );
     console.log("New table Orders created!"); 
     // insert default table
@@ -179,15 +179,15 @@ app.get("/index", isAuthenticated, (req, res) => {
 });
 
 
-// 実績ページへの遷移
-app.get("/records", isAuthenticated, (req, res) => {
-  res.render(`${__dirname}/views/records.ejs`, { login_people: req.user });
-});
-
-
 // 編集ページへの遷移
 app.get("/edit", isAuthenticated, (req, res) => {
   res.render(`${__dirname}/views/edit.ejs`, { login_people: req.user });
+});
+
+
+// 実績ページへの遷移
+app.get("/records", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/records.ejs`, { login_people: req.user });
 });
 
 
@@ -207,11 +207,26 @@ app.get("/getMenusData", (request, response) => {
 
 //サーバーサイドからフロントエンドへOrdersデータを送付
 app.get("/getOrdersData", (request, response) => {
-  db.all("SELECT * from Orders ORDER by date DESC", (err, rows) => {
+  db.all("SELECT * from Orders ORDER by date DESC, id DESC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
+// ★サーバーサイドからフロントエンドへOrdersデータ20行ごとのデータ送付
+app.get("/getOrdersData/:i", (request, response) => {
+  console.log(request.params.i);
+  const i = request.params.i;
+  if (i == 1) {
+    db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 ", (err, rows) => {
+    response.send(JSON.stringify(rows));
+    });
+  } else if (i > 1) {
+    // db.all(`SELECT * from Orders ORDER by date DESC, id DESC OFFSET ${20 * (i - 1)} LIMIT 20`, (err, rows) => {
+    db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 OFFSET 20", (err, rows) => {
+    response.send(JSON.stringify(rows));
+    });
+  }
+});
 
 //日付 サーバーサイドでは日本時間にならないので日本時間に変換
 const today = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
@@ -227,6 +242,20 @@ const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
 
+// 本日の注文者とメニュー id date user store menu price change
+app.get("/getTodaysOrders", (request, response) => {
+  db.all("SELECT * from Orders WHERE date = '"+thisDay+"' ORDER by store ASC, user ASC, price DESC", (err, rows) => {    
+    response.send(JSON.stringify(rows));
+  });
+});
+
+// 本日のお釣り user change
+app.get("/getTodaysChanges", (request, response) => {
+  db.all("SELECT id, user, change, changed_check from Orders WHERE date = '"+thisDay+"' and change is not '' ORDER by user ASC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
 // 本日の店別・合計金額  store sum
 app.get("/getTodaysStoresTotalAmount", (request, response) => {
   db.all("SELECT store, sum(price) as sum from Orders WHERE date = '"+thisDay+"' GROUP by store ORDER by store ASC", (err, rows) => {
@@ -234,17 +263,11 @@ app.get("/getTodaysStoresTotalAmount", (request, response) => {
   });
 });
 
-// 本日の注文者とメニュー id date user store menu price change
-app.get("/getTodaysOrders", (request, response) => {
-  db.all("SELECT * from Orders WHERE date = '"+thisDay+"' ORDER by store ASC, user ASC, price DESC", (err, rows) => {
-    response.send(JSON.stringify(rows));
-  });
-});
 
-// 本日のお釣り user change
-app.get("/getTodaysChanges", (request, response) => {
-  db.all("SELECT user, change from Orders WHERE date = '"+thisDay+"' and change is not '' ORDER by user ASC", (err, rows) => {
-    response.send(JSON.stringify(rows));
+//★ Ordersのidの行数を取得
+app.get("/getOrdersIdNumbers", (req, res) => {
+  db.all("SELECT COUNT (id) from Orders", (err, idNunbers) => {
+    res.send(JSON.stringify(idNunbers));
   });
 });
 
@@ -277,6 +300,74 @@ app.post("/menus/addEdit", (req, res) => {
   }
   return res.render(`${__dirname}/views/edit.ejs`);
 });
+
+
+//数値かどうか判定する関数。数値であればtrueを返す
+const isNumber = (n) => {
+  const v = n - 0; //"10" - 0;=> 10, "a" - 0;=> NaN, 数値でなければNaNを返す
+  if ( v || v === 0 ) {
+    return true;
+  }
+  return false;
+};
+
+
+//★Ordersテーブルのordered_checkとchanged_checkの追加・更新 Update処理
+app.post("/orders/check", (req, res) => {
+  const ordered_checkId = req.body.ordered_check; //単数選択101,複数選択[ '101', '103', '102' ]
+  const changed_checkId = req.body.changed_check;
+  if (ordered_checkId == undefined) {
+    console.log("'ordered_check' is undefined");
+  } else if (isNumber(ordered_checkId)) { //数値だった場合  
+    const selectId = ordered_checkId;
+    console.log(selectId);
+    const stmt = db.prepare(`UPDATE Orders set ordered_check = 1 where id = ${selectId}`);
+    stmt.run();
+    stmt.finalize();
+  } else {
+    for (let i = 0; i < ordered_checkId.length; i++) {
+      const selectId = ordered_checkId[i];
+      console.log(selectId);
+      const stmt = db.prepare(`UPDATE Orders set ordered_check = 1 where id = ${selectId}`);
+      stmt.run();
+      stmt.finalize();
+    }
+  }
+  if (changed_checkId == undefined) {
+    console.log("'changed_check' is undefined");
+  } else if (isNumber(changed_checkId)) {
+    const selectId = changed_checkId;
+    console.log(selectId);
+    const stmt = db.prepare(`UPDATE Orders set changed_check = 1 where id = ${selectId}`);
+    stmt.run();
+    stmt.finalize();
+  } else {
+    for (let i = 0; i < changed_checkId.length; i++) {
+      const selectId = changed_checkId[i];
+      console.log(selectId);
+      const stmt = db.prepare(`UPDATE Orders set changed_check = 1 where id = ${selectId}`);
+      stmt.run();
+      stmt.finalize();
+    }
+  }
+  return res.render(`${__dirname}/views/index.ejs`);
+});
+
+//チェックのリセット
+app.get("/orders/check/reset", (req, res) => {
+  db.all("SELECT * from Orders WHERE date = '"+thisDay+"'", (err, rows) => {
+    for (let i = 0; i < JSON.stringify(rows.length); i++) {
+      console.log(i);
+      console.log(JSON.stringify(rows[i].id));
+      const allTodayId = JSON.stringify(rows[i].id);
+      const stmt = db.prepare(`UPDATE Orders set ordered_check = "", changed_check = "" where id = ${allTodayId}`);
+      stmt.run();
+      stmt.finalize();
+    }
+  });
+  return res.render(`${__dirname}/views/index.ejs`);
+});
+
 
 
 //Usersテーブルの削除

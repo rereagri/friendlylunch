@@ -172,7 +172,15 @@ fetch("/getTodaysOrders", {})
   .then(res => res.json())
   .then(response => {
     response.forEach(row => {
-      appendTodaysOrders(row.store, row.user, row.menu, row.price);
+      appendTodaysOrders(row.id, row.store, row.user, row.menu, row.price, row.ordered_check);
+    });
+  });
+
+fetch("/getTodaysChanges", {})
+  .then(res => res.json())
+  .then(response => {
+    response.forEach(row => {
+      appendTodaysChanges(row.id, row.user, row.change, row.changed_check);
     });
   });
 
@@ -184,17 +192,9 @@ fetch("/getTodaysStoresTotalAmount", {})
     });
   });
 
-fetch("/getTodaysChanges", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendTodaysChanges(row.user, row.change);
-    });
-  });
 
-
-//集計　store,user,menu,price
-const appendTodaysOrders = (store, user, menu, price)=> {
+//本日の集計　store,user,menu,price
+const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
   const parent = document.getElementById("appendTodaysOrdersArea");
   const tr_store = document.createElement("tr");
     tr_store.className = `ordered_${store}`;
@@ -202,52 +202,155 @@ const appendTodaysOrders = (store, user, menu, price)=> {
     strong_store.innerText = store;
     strong_store.className = "font-weight-bold eachStoreName";
   const tr_order = document.createElement("tr");
+  const td_id = document.createElement("td");
+    td_id.hidden = true;
+    td_id.textContent = id;
   const td_user = document.createElement("td");
     td_user.textContent = user;
   const td_menu = document.createElement("td");
     td_menu.textContent = menu;
   const td_price = document.createElement("td");
     td_price.textContent = price;
+  const td_orderedCheck = document.createElement("td");
+  const input_ordered = document.createElement("input");
+    input_ordered.className = "form-check-input";
+    input_ordered.type = "checkbox";
+    input_ordered.name = "ordered_check";
+    input_ordered.value = id;
+    if (ordered_check == 1) {
+      input_ordered.checked = true;
+    }
+  const label_ordered = document.createElement("label");
+    label_ordered.className = "form-check-label";
+    label_ordered.innerText = "済";
   const orderedStore = document.getElementsByClassName(`ordered_${store}`);
   if (orderedStore.length == 0) {
     parent.appendChild(tr_store);
     tr_store.append(strong_store);
     parent.appendChild(tr_order);
+    tr_order.append(td_id);
     tr_order.append(td_user);
     tr_order.append(td_menu);
-    tr_order.append(td_price); 
+    tr_order.append(td_price);
+    tr_order.append(td_orderedCheck);
+    td_orderedCheck.append(input_ordered);
+    td_orderedCheck.append(label_ordered);
   } else {
     parent.appendChild(tr_order);
+    tr_order.append(td_id);
     tr_order.append(td_user);
     tr_order.append(td_menu);
-    tr_order.append(td_price);   
+    tr_order.append(td_price);
+    tr_order.append(td_orderedCheck);
+    td_orderedCheck.append(input_ordered);
+    td_orderedCheck.append(label_ordered);
   }
   };
 
 
-//集計 store sum
+//本日の集計　お釣り
+const appendTodaysChanges = (id, user, change, changed_check)=> {
+  const parent = document.getElementById("appendTodaysChangesArea");
+  const tr = document.createElement("tr");
+  const td_id = document.createElement("td");
+    td_id.hidden = true;
+    td_id.textContent = id;
+  const td_user = document.createElement("td");
+    td_user.textContent = user;
+    td_user.className = "col-6";
+  const td_change = document.createElement("td");
+    td_change.textContent = change;
+    td_change.className = "col-3";
+  const td_orderedCheck = document.createElement("td");
+    td_orderedCheck.className = "col-3";
+  const input_ordered = document.createElement("input");
+    input_ordered.className = "form-check-input";
+    input_ordered.type = "checkbox";
+    input_ordered.name = "changed_check";
+    input_ordered.value = id;
+    if (changed_check == 1) {
+      input_ordered.checked = true;
+    }
+  const label_ordered = document.createElement("label");
+    label_ordered.className = "form-check-label";
+    label_ordered.innerText = "済";
+  parent.appendChild(tr);
+  tr.append(td_id);
+  tr.append(td_user);
+  tr.append(td_change);
+  tr.append(td_orderedCheck);
+  td_orderedCheck.append(input_ordered);
+  td_orderedCheck.append(label_ordered);
+}
+
+
+//本日の集計 店別金額　store sum
 const appendTodaysStoresTotalAmount = (store, sum)=> {
   const parent = document.getElementById("appendTodaysStoresTotalAmountArea");
   const tr = document.createElement("tr");
   const td_store = document.createElement("td");
     td_store.textContent = store;
+    td_store.className = "col-6";
   const td_sum = document.createElement("td");
     td_sum.textContent = sum;
-    td_sum.className = "eachStoreSum"
+    td_sum.className = "eachStoreSum col-6"
   parent.appendChild(tr);
   tr.append(td_store);
   tr.append(td_sum);
 }
 
-//集計　お釣り
-const appendTodaysChanges = (user, change)=> {
-  const parent = document.getElementById("appendTodaysChangesArea");
-  const tr = document.createElement("tr");
-  const td_user = document.createElement("td");
-    td_user.textContent = user;
-  const td_change = document.createElement("td");
-    td_change.textContent = change;
-  parent.appendChild(tr);
-  tr.append(td_user);
-  tr.append(td_change);
-}
+const ordersResetBtn = document.getElementById("ordersResetBtn");
+  ordersResetBtn.addEventListener("click", () => {
+    window.location.href = `/orders/check/reset`;
+  });
+
+
+//★ordersテーブルにcheck情報を保存
+// const ordersCheckBtn = document.getElementById("ordersCheckBtn");
+// ordersCheckBtn.addEventListener("click", () => {
+//   const thisDay = new Date();
+//   console.log(thisDay);
+//   const ordered_check = document.querySelectorAll("input[name=ordered_check]:checked");
+//   const changed_check = document.querySelectorAll("input[name=changed_check]:checked");
+//   console.log(ordered_check[0].value);
+//   console.log(changed_check[0].value);
+//   const ordersUpdateArray = [];  
+  // //★ユーザー名:0 or メニュー:0のとき どっちか一方が0のとき
+  // if (checked_selectUserName.length == 0 || checked_selectStoreMenuPrice.length == 0) {
+  //   document.getElementById("errormessage").textContent = "エラー：ユーザー名とメニューを選択してください。";
+  // };
+  // //★ユーザー名：１　 & メニュー：１のとき
+  // if(checked_selectStoreMenuPrice.length == 1 && checked_selectUserName.length == 1) {
+  //   document.getElementById("errormessage").textContent = "";
+  //   ordersUpdateArray.push(thisDay);
+  //   for (const data_selectUserName of checked_selectUserName) {
+  //     ordersUpdateArray.push(data_selectUserName.value);
+  //   }
+  //   for (const data_selectStoreMenuPrice of checked_selectStoreMenuPrice) {
+  //     const ary = data_selectStoreMenuPrice.value.split(',');
+  //     for (let i = 0; i < ary.length; i++) {
+  //       ordersUpdateArray.push(ary[i]);
+  //     }
+  //   }
+  //   for (const data_selectChangeValue of selectChangeValue) {
+  //     ordersUpdateArray.push(data_selectChangeValue.value);
+  //   }
+  //   console.log(ordersUpdateArray);
+  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
+  // };
+  // //★メニューが２つ以上のとき
+  // if(checked_selectStoreMenuPrice.length > 1 && checked_selectUserName.length == 1) {
+  //   document.getElementById("errormessage").textContent = "";
+  //   for (let i = 0; i < checked_selectStoreMenuPrice.length; i++) {
+  //       ordersUpdateArray.push(thisDay);     
+  //       ordersUpdateArray.push(checked_selectUserName[0].value);      
+  //       for (let h = 0; h < checked_selectStoreMenuPrice[i].value.split(',').length; h++) {
+  //         console.log(checked_selectStoreMenuPrice[i].value.split(',')[h])
+  //         ordersUpdateArray.push(checked_selectStoreMenuPrice[i].value.split(',')[h]); 
+  //       }
+  //       ordersUpdateArray.push(selectChangeValue[0].value);  
+  //   }
+  //   console.log(ordersUpdateArray);
+  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
+  // };
+// });
