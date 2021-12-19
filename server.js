@@ -93,7 +93,7 @@ db.serialize(() => {
     );
     console.log("New table Users created!"); 
     db.run(
-      "CREATE TABLE Menus (id INTEGER PRIMARY KEY AUTOINCREMENT, store TEXT, menu TEXT, price INTEGER)"
+      "CREATE TABLE Menus (id INTEGER PRIMARY KEY AUTOINCREMENT, store TEXT, menu TEXT, price INTEGER, tellnum INTEGER)"
     );
     console.log("New table Menus created!");
     db.run(
@@ -101,6 +101,10 @@ db.serialize(() => {
     );
     console.log("New table Orders created!"); 
     // insert default table
+    db.run(
+      "CREATE TABLE Tellnums (id INTEGER PRIMARY KEY AUTOINCREMENT, store TEXT, tellnums INTEGER)"
+    );
+    console.log("New table Tellnums created!")
     db.serialize(() => {
       db.run(
         'INSERT INTO Users (user) VALUES ("ユーザー１"), ("ユーザー２"), ("ユーザー３")'
@@ -113,13 +117,19 @@ db.serialize(() => {
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", さくら弁当", "普通", "500"), ("山田　太郎", "さくら弁当", "おかずのみ", "280")'
+        'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", "さくら弁当", "普通", "500"), ("山田　太郎", "さくら弁当", "おかずのみ", "280")'
+      );
+    });
+    db.serialize(() => {
+      db.run(
+        'INSERT INTO Tellnums (store, tellnums) VALUES ("さくら弁当", "4854318")'
       );
     });
   } else {
     console.log('Database "Users" ready to go!');
     console.log('Database "Menus" ready to go!');
     console.log('Database "Orders" ready to go!');
+    console.log('Database "Tellnums" ready to go!');
     // db.each("SELECT * from Users", (err, row) => {
     //   if (row) {
     //     console.log(`record: ${row.user}`);
@@ -228,6 +238,14 @@ app.get("/getOrdersData/:i", (request, response) => {
   }
 });
 
+//サーバーサイドからフロントエンドへTellnumsデータを送付
+app.get("/getTellnumsData", (request, response) => {
+  db.all("SELECT * from Tellnums", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
+
 //日付 サーバーサイドでは日本時間にならないので日本時間に変換
 const today = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
 const year = today.getFullYear();
@@ -312,7 +330,7 @@ const isNumber = (n) => {
 };
 
 
-//★Ordersテーブルのordered_checkとchanged_checkの追加・更新 Update処理
+//Ordersテーブルのordered_checkとchanged_checkの追加・更新 Update処理
 app.post("/orders/check", (req, res) => {
   const ordered_checkId = req.body.ordered_check; //単数選択101,複数選択[ '101', '103', '102' ]
   const changed_checkId = req.body.changed_check;
@@ -367,7 +385,6 @@ app.get("/orders/check/reset", (req, res) => {
   });
   return res.render(`${__dirname}/views/index.ejs`);
 });
-
 
 
 //Usersテーブルの削除
