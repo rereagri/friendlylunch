@@ -38,6 +38,7 @@ fetch("/getMenusData", {})
   });
 
 
+
 //indexページ Usersデータ反映 ラジオボタン a helper function that creates a list item for a given user
 const appendUserRadio = (id, user) => {
   // console.log(id, user);
@@ -56,6 +57,25 @@ const appendUserRadio = (id, user) => {
   div.append(input);
   div.append(label);
 }
+
+
+
+  
+  // const parent = document.getElementById("usersArea");
+  // const div = document.createElement("div");
+  //   div.className = "form-check mb-4";
+  // const input = document.createElement("input");
+  //   input.className = "form-check-input";
+  //   input.type = "radio";
+  //   input.name = "selectUserName"
+  //   input.value = user;
+  // const label = document.createElement("label");
+  //   label.className = "form-check-label";
+  //   label.innerText = user;
+  // parent.appendChild(div);
+  // div.append(input);
+  // div.append(label);
+// }
 
 
 // indexページ Menusデータ反映 アコーディオン　ヘッダー
@@ -201,6 +221,9 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
   const strong_store = document.createElement("strong");
     strong_store.innerText = store;
     strong_store.className = "font-weight-bold eachStoreName";
+  const strong_tellnum = document.createElement("strong");
+    strong_tellnum.className = "tellnumArea";
+    strong_tellnum.innerText = "tel";
   const tr_order = document.createElement("tr");
   const td_id = document.createElement("td");
     td_id.hidden = true;
@@ -227,6 +250,7 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
   if (orderedStore.length == 0) {
     parent.appendChild(tr_store);
     tr_store.append(strong_store);
+    tr_store.append(strong_tellnum);
     parent.appendChild(tr_order);
     tr_order.append(td_id);
     tr_order.append(td_user);
@@ -299,10 +323,34 @@ const appendTodaysStoresTotalAmount = (store, sum)=> {
   tr.append(td_sum);
 }
 
+//本日の集計　チェックのリセット
 const ordersResetBtn = document.getElementById("ordersResetBtn");
   ordersResetBtn.addEventListener("click", () => {
     window.location.href = `/orders/check/reset`;
   });
+
+
+//indexページでTellnumsデータを呼び出し
+fetch("/getTellnumsData", {})
+  .then(res => res.json())
+  .then(response => {
+    response.forEach(row => {
+      appendTellnums(row.store, row.tellnums);
+    });
+  });
+
+
+//★indexページ Tellnumsデータ反映 集計場所に電話番号記述
+const appendTellnums = (store, tellnums) => {
+  const eachStoreName = document.getElementsByClassName("eachStoreName"); //HTMLCollection。そのままでは要素を扱えない。for文を使う。
+  const tellnumArea = document.getElementsByClassName("tellnumArea");
+  for (let i = 0; i < eachStoreName.length; i++) {
+    if (store === eachStoreName[i].innerText) {
+      tellnumArea[i].innerText = "Tel:" + tellnums;
+    }
+  }
+};
+
 
 
 //★ordersテーブルにcheck情報を保存

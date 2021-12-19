@@ -87,7 +87,7 @@
             <tr>
               <th hidden class="bg-light col-0 text-center">ID</th>
               <th class="bg-light col-4 text-center">店名</th>
-              <th class="bg-light col-7 text-center">電話</th>
+              <th class="bg-light col-7 text-center">電話番号</th>
               <th class="bg-light col-1 text-center">削</th>
             </tr>
           </tbody>
@@ -243,32 +243,36 @@
         const parent = document.getElementById("tellFormArea");
         const tr = document.createElement("tr");
         const td_1 = document.createElement("td");
+          td_1.className = "px-1";
           td_1.hidden = true;
           td_1.name = "tellTd_1";
         const input_1 = document.createElement("input");
           input_1.readOnly = true;
-          input_1.className = "form-control text-center";
+          input_1.className = "form-control text-center px-0";
           input_1.type = "number";
           input_1.name = "tellId";
           input_1.value = id;
         const td_2 = document.createElement("td");
+          td_2.className = "px-1";
         const input_2 = document.createElement("input");
-          input_2.className = "form-control";
+          input_2.className = "form-control px-0";
           input_2.type = "text";
           input_2.name = "tellStoreName";
           input_2.value = store;
         const td_3 = document.createElement("td");
+          td_3.className = "px-1";
         const input_3 = document.createElement("input");
-          input_3.className = "form-control";
-          input_3.type = "text";
-          input_3.name = "tellNumName";
+          input_3.className = "form-control px-0";
+          input_3.type = "number";
+          input_3.name = "tellNum";
           input_3.value = tellnums;
         const td_4 = document.createElement("td");
+          td_4.className = "px-1";
         const input_4 = document.createElement("input");
           input_4.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
           input_4.className = "form-control btn btn-outline-secondary";
           input_4.type = "button";
-          input_4.name = `deleteUserBtn_${id}`;
+          input_4.name = `deleteTellnumBtn_${id}`;
           input_4.value =　"×";
         parent.appendChild(tr);
         tr.append(td_1);
@@ -351,7 +355,6 @@
           input_4.name = "menuPrice";
         const td_5 = document.createElement("td");
         const input_5 = document.createElement("input");
-          td_5.className = "px-1";
           input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
           input_5.className = "form-control btn-outline-secondary px-0";
           input_5.type = "button";
@@ -384,28 +387,26 @@
           input_1.className = "form-control text-center px-0";
           input_1.type = "number";
           input_1.name = "tellId";
-          // input_1.value = id;
+          input_1.value = maxTellnumId();
         const td_2 = document.createElement("td");
           td_2.className = "px-1";
         const input_2 = document.createElement("input");
           input_2.className = "form-control px-0";
           input_2.type = "text";
           input_2.name = "tellStoreName";
-          // input_2.value = store;
         const td_3 = document.createElement("td");
           td_3.className = "px-1";
         const input_3 = document.createElement("input");
           input_3.className = "form-control px-0";
-          input_3.type = "text";
-          input_3.name = "tellNumName";
+          input_3.type = "number";
+          input_3.name = "tellNum";
           input_3.placeholder = "半角数字のみ、ハイフン×"
-          // input_3.value = tellnums;
         const td_4 = document.createElement("td");
         const input_4 = document.createElement("input");
-          // input_3.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
+          input_3.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
           input_4.className = "form-control btn btn-outline-secondary px-1";
           input_4.type = "button";
-          // input_3.name = `deleteUserBtn_${id}`;
+          input_4.name = `deleteTellnumBtn_${input_1.value}`;
           input_4.value =　"×";
         parent.appendChild(tr);
         tr.append(td_1);
@@ -443,6 +444,22 @@
       };
       
       
+      //edit Tellnums idの最大値の取得
+      function maxTellnumId() {
+        const id = document.getElementsByName("tellId");
+        const idAry = [];
+        if (id.length == 0) {
+          return 1;
+        } else {
+          for (let i = 0; i < id.length; i++) {
+            idAry.push(id[i].value);
+          };
+        console.log(idAry);
+        return parseInt(Math.max.apply(null, idAry) + 1);
+        }
+      };
+      
+      
       //edit Users デリートにチェックされたidの取得
       function deleteUser() {
         const activeDeleteUserBtn = document.activeElement;
@@ -467,9 +484,18 @@
         }
       };
       
-      //テーブルTellnumsの編集
-      // const menuStore = document.getElementsByName("menuStore");
-      // console.log(menuStore.length);
+      //edit Tellnums デリートにチェックされたidの取得
+      function deleteTellnum() {
+        const activeDeleteTellnumBtn = document.activeElement;
+        const deleteId = activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", "");
+        const result = window.confirm("削除しますか？");
+        console.log(activeDeleteTellnumBtn.name);
+        console.log(activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", ""));
+        if (result) {
+          window.location.href = `/tellnums/delete/${deleteId}`;
+        }
+      };
+
       
     </script>
     

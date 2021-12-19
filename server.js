@@ -135,16 +135,6 @@ db.serialize(() => {
     //     console.log(`record: ${row.user}`);
     //   }
     // });
-    // db.each("SELECT * from Menus", (err, row) => {
-    //   if (row) {
-    //     console.log(`record: ${row.store}, ${row.menu}, ${row.price}`);
-    //   }
-    // });
-    // db.each("SELECT * from Orders", (err, row) => {
-    //   if (row) {
-    //     console.log(`record: ${row.id}, ${row.date}, ${row.user}, ${row.store}, ${row.menu}, ${row.price}, ${row.change}`);
-    //   }
-    // });
   }
 });
 
@@ -320,6 +310,22 @@ app.post("/menus/addEdit", (req, res) => {
 });
 
 
+//Menusテーブルの追加・更新 Upsert処理
+app.post("/tellnums/addEdit", (req, res) => {
+  // console.log(req.body);
+  const getTellId = req.body.tellId;
+  const getTellStoreName = req.body.tellStoreName;
+  const getTellNum = req.body.tellNum;
+  for(let i = 0; i < getTellId.length; i++) {
+    console.log(getTellId[i], getTellStoreName[i], getTellNum[i]);
+    const stmt = db.prepare("INSERT OR REPLACE INTO Tellnums (id, store, tellnums) VALUES (?, ?, ?)", getTellId[i], getTellStoreName[i], getTellNum[i]);
+    stmt.run();
+    stmt.finalize();
+  }
+  return res.render(`${__dirname}/views/edit.ejs`);
+});
+
+
 //数値かどうか判定する関数。数値であればtrueを返す
 const isNumber = (n) => {
   const v = n - 0; //"10" - 0;=> 10, "a" - 0;=> NaN, 数値でなければNaNを返す
@@ -417,6 +423,17 @@ app.get("/orders/delete/:deleteId", (req, res) => {
   stmt.run(deleteId);
   stmt.finalize();
   return res.render(`${__dirname}/views/records.ejs`);
+});
+
+
+//Tellnumsテーブルの削除
+app.get("/tellnums/delete/:deleteId", (req, res) => {
+  const deleteId = req.params.deleteId;
+  console.log(deleteId);
+  const stmt = db.prepare("DELETE FROM Tellnums WHERE id = (?)");
+  stmt.run(deleteId);
+  stmt.finalize();
+  return res.render(`${__dirname}/views/edit.ejs`);
 });
 
 
