@@ -9,6 +9,38 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
 const flash = require('connect-flash');
 
+
+//init sqlite db
+const dbFile = "./.data/sqlite.db";
+const exists = fs.existsSync(dbFile);
+const sqlite3 = require("sqlite3").verbose();
+const db = new sqlite3.Database(dbFile);
+
+
+//日付 サーバーサイドでは日本時間にならないので日本時間に変換
+const today = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
+const year = today.getFullYear();
+const month = ("0" + (today.getMonth() + 1)).slice(-2); //２桁で取得する。04等
+const week = today.getDay();
+const day = ("0" + today.getDate()).slice(-2);　
+const hour = ("0" + (today.getHours())).slice(-2);
+const minute = ("0" + today.getMinutes()).slice(-2);
+//年・月・日・曜日を取得
+const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
+const thisDay = year + "-" + month + "-" + day;
+console.log(thisDay);
+
+
+//数値かどうか判定する関数。数値であればtrueを返す
+const isNumber = (n) => {
+  const v = n - 0; //"10" - 0;=> 10, "a" - 0;=> NaN, 数値でなければNaNを返す
+  if ( v || v === 0 ) {
+    return true;
+  }
+  return false;
+};
+
+
 // middleware
 app.use(express.static("public"));
 
@@ -31,12 +63,6 @@ app.set('view engine', 'ejs');
 
 // dotenv
 require('dotenv').config();
-
-//init sqlite db
-const dbFile = "./.data/sqlite.db";
-const exists = fs.existsSync(dbFile);
-const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database(dbFile);
 
 
 // passport
@@ -213,20 +239,20 @@ app.get("/getOrdersData", (request, response) => {
 });
 
 // ★サーバーサイドからフロントエンドへOrdersデータ20行ごとのデータ送付
-app.get("/getOrdersData/:i", (request, response) => {
-  console.log(request.params.i);
-  const i = request.params.i;
-  if (i == 1) {
-    db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 ", (err, rows) => {
-    response.send(JSON.stringify(rows));
-    });
-  } else if (i > 1) {
-    // db.all(`SELECT * from Orders ORDER by date DESC, id DESC OFFSET ${20 * (i - 1)} LIMIT 20`, (err, rows) => {
-    db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 OFFSET 20", (err, rows) => {
-    response.send(JSON.stringify(rows));
-    });
-  }
-});
+// app.get("/getOrdersData/:i", (request, response) => {
+//   console.log(request.params.i);
+//   const i = request.params.i;
+//   if (i == 1) {
+//     db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 ", (err, rows) => {
+//     response.send(JSON.stringify(rows));
+//     });
+//   } else if (i > 1) {
+//     // db.all(`SELECT * from Orders ORDER by date DESC, id DESC OFFSET ${20 * (i - 1)} LIMIT 20`, (err, rows) => {
+//     db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 OFFSET 20", (err, rows) => {
+//     response.send(JSON.stringify(rows));
+//     });
+//   }
+// });
 
 //サーバーサイドからフロントエンドへTellnumsデータを送付
 app.get("/getTellnumsData", (request, response) => {
@@ -234,20 +260,6 @@ app.get("/getTellnumsData", (request, response) => {
     response.send(JSON.stringify(rows));
   });
 });
-
-
-//日付 サーバーサイドでは日本時間にならないので日本時間に変換
-const today = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
-const year = today.getFullYear();
-const month = ("0" + (today.getMonth() + 1)).slice(-2); //２桁で取得する。04等
-const week = today.getDay();
-const day = ("0" + today.getDate()).slice(-2);　
-const hour = ("0" + (today.getHours())).slice(-2);
-const minute = ("0" + today.getMinutes()).slice(-2);
-//年・月・日・曜日を取得
-const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
-const thisDay = year + "-" + month + "-" + day;
-console.log(thisDay);
 
 
 // 本日の注文者とメニュー id date user store menu price change
@@ -273,11 +285,11 @@ app.get("/getTodaysStoresTotalAmount", (request, response) => {
 
 
 //★ Ordersのidの行数を取得
-app.get("/getOrdersIdNumbers", (req, res) => {
-  db.all("SELECT COUNT (id) from Orders", (err, idNunbers) => {
-    res.send(JSON.stringify(idNunbers));
-  });
-});
+// app.get("/getOrdersIdNumbers", (req, res) => {
+//   db.all("SELECT COUNT (id) from Orders", (err, idNunbers) => {
+//     res.send(JSON.stringify(idNunbers));
+//   });
+// });
 
 
 //Usersテーブルの追加・更新 Upsert処理
@@ -324,16 +336,6 @@ app.post("/tellnums/addEdit", (req, res) => {
   }
   return res.render(`${__dirname}/views/edit.ejs`);
 });
-
-
-//数値かどうか判定する関数。数値であればtrueを返す
-const isNumber = (n) => {
-  const v = n - 0; //"10" - 0;=> 10, "a" - 0;=> NaN, 数値でなければNaNを返す
-  if ( v || v === 0 ) {
-    return true;
-  }
-  return false;
-};
 
 
 //Ordersテーブルのordered_checkとchanged_checkの追加・更新 Update処理

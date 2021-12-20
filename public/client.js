@@ -1,6 +1,15 @@
 console.log("hello world");
 
 
+//enter押しでsubmitしないようにする。
+document.onkeypress = submit_cancel;
+function submit_cancel(){
+    if( window.event.keyCode == 13 ){
+        return false;
+    }
+};
+
+
 //日付　クライアントサイドでは自動的に日本時間になっているため日本時間に変更する必要なし。
 const today = new Date();
 const year = today.getFullYear();
@@ -15,6 +24,8 @@ const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
 document.getElementById("todayDate").textContent =
   year + "年" + month + "月" + day + "日 " + week_ja[week] + "曜日";
 document.getElementById("todayTime").textContent = hour + "時" + minute + "分";
+const thisDay = year + "-" + month + "-" + day;
+console.log(thisDay);
 
 
 // index request the Users from our app's sqlite database
@@ -38,7 +49,6 @@ fetch("/getMenusData", {})
   });
 
 
-
 //indexページ Usersデータ反映 ラジオボタン a helper function that creates a list item for a given user
 const appendUserRadio = (id, user) => {
   // console.log(id, user);
@@ -51,31 +61,13 @@ const appendUserRadio = (id, user) => {
     input.name = "selectUserName"
     input.value = user;
   const label = document.createElement("label");
-    label.className = "form-check-label";
+    label.className = "form-check-label userLabel";
     label.innerText = user;
+    label.name = "userLabel";
   parent.appendChild(div);
   div.append(input);
   div.append(label);
 }
-
-
-
-  
-  // const parent = document.getElementById("usersArea");
-  // const div = document.createElement("div");
-  //   div.className = "form-check mb-4";
-  // const input = document.createElement("input");
-  //   input.className = "form-check-input";
-  //   input.type = "radio";
-  //   input.name = "selectUserName"
-  //   input.value = user;
-  // const label = document.createElement("label");
-  //   label.className = "form-check-label";
-  //   label.innerText = user;
-  // parent.appendChild(div);
-  // div.append(input);
-  // div.append(label);
-// }
 
 
 // indexページ Menusデータ反映 アコーディオン　ヘッダー
@@ -140,8 +132,7 @@ const appendMenuAccordionHeader = (id, store, menu, price) => {
 //ordersテーブルに保存するupdate情報
 const ordersUpdateBtn = document.getElementById("ordersUpdateBtn");
 ordersUpdateBtn.addEventListener("click", () => {
-  // const date = document.getElementById("todayDate").textContent + document.getElementById("todayTime").textContent;
-  const thisDay = year + "-" + month + "-" + day;
+  // const thisDay = year + "-" + month + "-" + day;
   const checked_selectUserName = document.querySelectorAll("input[name=selectUserName]:checked");
   const checked_selectStoreMenuPrice = document.querySelectorAll("input[name=selectStoreMenuPrice]:checked");
   const selectChangeValue = document.querySelectorAll("input[name=selectChangeValue]");
@@ -217,12 +208,12 @@ fetch("/getTodaysStoresTotalAmount", {})
 const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
   const parent = document.getElementById("appendTodaysOrdersArea");
   const tr_store = document.createElement("tr");
-    tr_store.className = `ordered_${store}`;
+    tr_store.className = `ordered_${store} row`;
   const strong_store = document.createElement("strong");
     strong_store.innerText = store;
-    strong_store.className = "font-weight-bold eachStoreName";
+    strong_store.className = "font-weight-bold eachStoreName col-8";
   const strong_tellnum = document.createElement("strong");
-    strong_tellnum.className = "tellnumArea";
+    strong_tellnum.className = "tellnumArea col-4";
     strong_tellnum.innerText = "tel";
   const tr_order = document.createElement("tr");
   const td_id = document.createElement("td");
@@ -230,13 +221,23 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
     td_id.textContent = id;
   const td_user = document.createElement("td");
     td_user.textContent = user;
+    td_user.name = "orderedUser";
+    td_user.className = "orderedUser col-5";
+    const userLabel = document.getElementsByClassName("userLabel");
+    for (let i = 0; i < userLabel.length; i++) {
+      if (user == userLabel[i].innerText) {
+        userLabel[i].className = "orderedUser text-decoration-line-through text-secondary";
+      }
+    }   
   const td_menu = document.createElement("td");
     td_menu.textContent = menu;
+    td_menu.className = "col-4"
   const td_price = document.createElement("td");
     td_price.textContent = price;
+    td_price.className = "col-2"
   const td_orderedCheck = document.createElement("td");
   const input_ordered = document.createElement("input");
-    input_ordered.className = "form-check-input";
+    input_ordered.className = "form-check-input col-1";
     input_ordered.type = "checkbox";
     input_ordered.name = "ordered_check";
     input_ordered.value = id;
@@ -245,7 +246,7 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check)=> {
     }
   const label_ordered = document.createElement("label");
     label_ordered.className = "form-check-label";
-    label_ordered.innerText = "済";
+    label_ordered.innerText = "";
   const orderedStore = document.getElementsByClassName(`ordered_${store}`);
   if (orderedStore.length == 0) {
     parent.appendChild(tr_store);
@@ -297,7 +298,7 @@ const appendTodaysChanges = (id, user, change, changed_check)=> {
     }
   const label_ordered = document.createElement("label");
     label_ordered.className = "form-check-label";
-    label_ordered.innerText = "済";
+    label_ordered.innerText = "";
   parent.appendChild(tr);
   tr.append(td_id);
   tr.append(td_user);
@@ -323,6 +324,7 @@ const appendTodaysStoresTotalAmount = (store, sum)=> {
   tr.append(td_sum);
 }
 
+
 //本日の集計　チェックのリセット
 const ordersResetBtn = document.getElementById("ordersResetBtn");
   ordersResetBtn.addEventListener("click", () => {
@@ -340,65 +342,13 @@ fetch("/getTellnumsData", {})
   });
 
 
-//★indexページ Tellnumsデータ反映 集計場所に電話番号記述
+//indexページ Tellnumsデータ反映 集計場所に電話番号記述
 const appendTellnums = (store, tellnums) => {
   const eachStoreName = document.getElementsByClassName("eachStoreName"); //HTMLCollection。そのままでは要素を扱えない。for文を使う。
   const tellnumArea = document.getElementsByClassName("tellnumArea");
   for (let i = 0; i < eachStoreName.length; i++) {
     if (store === eachStoreName[i].innerText) {
-      tellnumArea[i].innerText = "Tel:" + tellnums;
+      tellnumArea[i].innerText = "TEL" + tellnums;
     }
   }
 };
-
-
-
-//★ordersテーブルにcheck情報を保存
-// const ordersCheckBtn = document.getElementById("ordersCheckBtn");
-// ordersCheckBtn.addEventListener("click", () => {
-//   const thisDay = new Date();
-//   console.log(thisDay);
-//   const ordered_check = document.querySelectorAll("input[name=ordered_check]:checked");
-//   const changed_check = document.querySelectorAll("input[name=changed_check]:checked");
-//   console.log(ordered_check[0].value);
-//   console.log(changed_check[0].value);
-//   const ordersUpdateArray = [];  
-  // //★ユーザー名:0 or メニュー:0のとき どっちか一方が0のとき
-  // if (checked_selectUserName.length == 0 || checked_selectStoreMenuPrice.length == 0) {
-  //   document.getElementById("errormessage").textContent = "エラー：ユーザー名とメニューを選択してください。";
-  // };
-  // //★ユーザー名：１　 & メニュー：１のとき
-  // if(checked_selectStoreMenuPrice.length == 1 && checked_selectUserName.length == 1) {
-  //   document.getElementById("errormessage").textContent = "";
-  //   ordersUpdateArray.push(thisDay);
-  //   for (const data_selectUserName of checked_selectUserName) {
-  //     ordersUpdateArray.push(data_selectUserName.value);
-  //   }
-  //   for (const data_selectStoreMenuPrice of checked_selectStoreMenuPrice) {
-  //     const ary = data_selectStoreMenuPrice.value.split(',');
-  //     for (let i = 0; i < ary.length; i++) {
-  //       ordersUpdateArray.push(ary[i]);
-  //     }
-  //   }
-  //   for (const data_selectChangeValue of selectChangeValue) {
-  //     ordersUpdateArray.push(data_selectChangeValue.value);
-  //   }
-  //   console.log(ordersUpdateArray);
-  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
-  // };
-  // //★メニューが２つ以上のとき
-  // if(checked_selectStoreMenuPrice.length > 1 && checked_selectUserName.length == 1) {
-  //   document.getElementById("errormessage").textContent = "";
-  //   for (let i = 0; i < checked_selectStoreMenuPrice.length; i++) {
-  //       ordersUpdateArray.push(thisDay);     
-  //       ordersUpdateArray.push(checked_selectUserName[0].value);      
-  //       for (let h = 0; h < checked_selectStoreMenuPrice[i].value.split(',').length; h++) {
-  //         console.log(checked_selectStoreMenuPrice[i].value.split(',')[h])
-  //         ordersUpdateArray.push(checked_selectStoreMenuPrice[i].value.split(',')[h]); 
-  //       }
-  //       ordersUpdateArray.push(selectChangeValue[0].value);  
-  //   }
-  //   console.log(ordersUpdateArray);
-  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
-  // };
-// });
