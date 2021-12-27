@@ -13,7 +13,12 @@
     />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />   
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">  
     <!-- bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
@@ -23,8 +28,6 @@
     />
     <!-- import the webpage's stylesheet -->
     <link rel="stylesheet" href="/style.css" />
-    <!-- import the webpage's client-side javascript file -->
-    <!--<script defer src="/client.js"></script> -->
   </head>
   
   <body>
@@ -47,10 +50,11 @@
     <div class="container pt-4">
       <form action="/users/addEdit" method="post" name="UsersForm">
         <table class="table table-bordered">
-          <tbody id="nameFormArea">
+          <tbody id="nameFormArea" class="orderChangeItems">
             <tr>
               <th hidden class="bg-light col-0 text-center">ID</th>
-              <th class="bg-light col-11 text-center">ユーザー名</th>
+              <th class="bg-light col-2 text-center">番号</th>
+              <th class="bg-light col-9 text-center">ユーザー名</th>
               <th class="bg-light col-1 text-center">削</th>
             </tr>
           </tbody>
@@ -97,7 +101,7 @@
       </form>   
     </div>
 
-    <div class="container">
+    <div class="container text-center">
       <a href="/index">
         <button class="btn btn-dark mb-4">ホーム</button>
       </a>
@@ -127,14 +131,16 @@
           }
       };
       
+      
       //このページでUsersデータを呼び出し
       fetch("/getUsersData", {})
         .then(res => res.json())
         .then(response => {
           response.forEach(row => {
-             getUsersData(row.id, row.user);
+             getUsersData(row.id, row.user, row.refNum);
           });
         });
+      
       
        //このページでMenusデータを呼び出し
       fetch("/getMenusData", {})
@@ -145,6 +151,7 @@
           });
         });
       
+      
       //このページでTellnumsデータを呼び出し
       fetch("/getTellnumsData", {})
         .then(res => res.json())
@@ -154,10 +161,12 @@
           });
         });
 
+      
       //editページでUsersの反映
-      function getUsersData(id, user) {
+      function getUsersData(id, user, refNum) {
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
+          tr.id = refNum; //このidの数値がorderChangeItems関数の「toArray」に渡る
         const td_1 = document.createElement("td");
           td_1.hidden = true;
           td_1.name = "userTd_1";
@@ -169,17 +178,23 @@
           input_1.value = id;
         const td_2 = document.createElement("td");
         const input_2 = document.createElement("input");
-          input_2.className = "form-control";
+          input_2.className = "form-control refNum px-0 text-center";
           input_2.type = "text";
-          input_2.name = "userName";
-          input_2.value = user;
+          input_2.name = "refNum";
+          input_2.value = refNum;
         const td_3 = document.createElement("td");
         const input_3 = document.createElement("input");
-          input_3.onclick = deleteUser;　//関数をプロパティとして追加する場合は（）は不要
-          input_3.className = "form-control btn btn-outline-secondary";
-          input_3.type = "button";
-          input_3.name = `deleteUserBtn_${id}`;
-          input_3.value =　"×";
+          input_3.className = "form-control";
+          input_3.type = "text";
+          input_3.name = "userName";
+          input_3.value = user;
+        const td_4 = document.createElement("td");
+        const input_4 = document.createElement("input");
+          input_4.onclick = deleteUser;　//関数をプロパティとして追加する場合は（）は不要
+          input_4.className = "form-control btn btn-outline-secondary";
+          input_4.type = "button";
+          input_4.name = `deleteUserBtn_${id}`;
+          input_4.value =　"×";
         parent.appendChild(tr);
         tr.append(td_1);
         td_1.append(input_1);
@@ -187,6 +202,8 @@
         td_2.append(input_2);
         tr.append(td_3);
         td_3.append(input_3);
+        tr.append(td_4);
+        td_4.append(input_4);
       };
       
       
@@ -294,7 +311,6 @@
       };
       
       
-      
       //edit Users「行」追加
       function userRowAdd() {
         const parent = document.getElementById("nameFormArea");
@@ -310,16 +326,22 @@
           input_1.value = maxUserId();
         const td_2 = document.createElement("td");
         const input_2 = document.createElement("input");
-          input_2.className = "form-control";
+          input_2.className = "form-control refNum p-0 text-center";
           input_2.type = "text";
-          input_2.name = "userName";
+          input_2.name = "refNum";
+          input_2.value = maxRefNum();
         const td_3 = document.createElement("td");
         const input_3 = document.createElement("input");
-          input_3.onclick = deleteUser; //関数をプロパティとして追加する場合は（）は不要
-          input_3.className = "form-control btn btn-outline-secondary";
-          input_3.type = "button";
-          input_3.name = `deleteUserBtn_${input_1.value}`;
-          input_3.value =　"×";
+          input_3.className = "form-control";
+          input_3.type = "text";
+          input_3.name = "userName";
+        const td_4 = document.createElement("td");
+        const input_4 = document.createElement("input");
+          input_4.onclick = deleteUser; //関数をプロパティとして追加する場合は（）は不要
+          input_4.className = "form-control btn btn-outline-secondary";
+          input_4.type = "button";
+          input_4.name = `deleteUserBtn_${input_1.value}`;
+          input_4.value =　"×";
         parent.appendChild(tr);
         tr.append(td_1);
         td_1.append(input_1);
@@ -327,6 +349,8 @@
         td_2.append(input_2);
         tr.append(td_3);
         td_3.append(input_3);
+        tr.append(td_4);
+        td_4.append(input_4);
       };
       
       
@@ -441,6 +465,18 @@
       };
       
       
+       //edit Users refNumの最大値の取得
+      function maxRefNum() {
+        const id = document.getElementsByName("refNum");
+        const idAry = [];
+        for (let i = 0; i < id.length; i++) {
+          idAry.push(id[i].value);
+        };
+        console.log(idAry);
+        return parseInt(Math.max.apply(null, idAry) + 1);
+      };
+      
+      
       //edit Menus idの最大値の取得
       function maxMenuId() {
         const id = document.getElementsByName("menuId");
@@ -481,6 +517,7 @@
         }
       };
       
+      
       //edit Menus デリートにチェックされたidの取得
       function deleteMenu() {
         const activeDeleteMenuBtn = document.activeElement;
@@ -493,6 +530,7 @@
         }
       };
       
+      
       //edit Tellnums デリートにチェックされたidの取得
       function deleteTellnum() {
         const activeDeleteTellnumBtn = document.activeElement;
@@ -504,8 +542,29 @@
           window.location.href = `/tellnums/delete/${deleteId}`;
         }
       };
-
       
+      
+      //UsersのrefNumをドラッグ&ドロップで並べ替え
+      //jQueryとjQueryUIを利用
+      //並べ替えしたい要素に「class="orderChangeItems"」を入れる。
+      function order_change(ui){
+      };
+      $(function(){
+        order_change();
+        $(".orderChangeItems").sortable({
+          axis: "y", // ドラッグの方向を縦に固定
+          "opacity": 0.5, // ドラッグ中の透明度
+          "update": function(event,ui){ // ドラッグ完了後のコールバック
+            const updateRows = $(this).sortable( 'toArray' );
+            const refNum = document.getElementsByName("refNum");
+              for (let i = 0; i < refNum.length; i++) {
+                console.log(refNum[i].value);
+                refNum[i].value = i + 1;
+              }
+          }
+        });
+      });      
+   
     </script>
     
   </body>

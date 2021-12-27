@@ -1,61 +1,83 @@
 console.log("hello world");
 
 
-// index request the Users from our app's sqlite database
 //indexページでUsersデータを呼び出し
-fetch("/getUsersData", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendUserRadio(row.id, row.user);
-    });
-  });
+async function fetchGetUsersData () {
+  fetch("/getUsersData", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendUserRadio(row.id, row.user);
+      });
+    });  
+};
 
 
 //indexページでmenusデータを呼び出し
-fetch("/getMenusData", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendMenuAccordionHeader(row.id, row.store, row.menu, row.price);
+async function fetchGetMenusData () {
+  fetch("/getMenusData", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendMenuAccordionHeader(row.id, row.store, row.menu, row.price);
+      });
     });
-  });
+};
 
 
 //Ordersデータの呼び出し 当日の集計用
-fetch("/getTodaysOrders", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendTodaysOrders(row.id, row.store, row.user, row.menu, row.price, row.ordered_check);
+async function fetchGetTodaysOrders () {
+  fetch("/getTodaysOrders", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendTodaysOrders(row.id, row.store, row.user, row.menu, row.price, row.ordered_check);
+      });
     });
-  });
 
-fetch("/getTodaysChanges", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendTodaysChanges(row.id, row.user, row.change, row.changed_check);
+  fetch("/getTodaysChanges", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendTodaysChanges(row.id, row.user, row.change, row.changed_check);
+      });
     });
-  });
 
-fetch("/getTodaysStoresTotalAmount", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendTodaysStoresTotalAmount(row.store, row.sum);
+  fetch("/getTodaysStoresTotalAmount", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendTodaysStoresTotalAmount(row.store, row.sum);
+      });
     });
-  });
+};
 
 
 //indexページでTellnumsデータを呼び出し
-fetch("/getTellnumsData", {})
-  .then(res => res.json())
-  .then(response => {
-    response.forEach(row => {
-      appendTellnums(row.store, row.tellnums);
+async function fetchGetTellnumsData () {
+  fetch("/getTellnumsData", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendTellnums(row.store, row.tellnums);
+      });
     });
-  });
+};
+
+
+//注文済みuserのトランスフォーム
+async function fetchOrderedUsers () {
+  fetch("/getTodaysOrders", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendOrderedUserTransform(row.user);
+      });
+    });
+};
+
+
+fetchGetUsersData().then(fetchGetMenusData()).then(fetchGetTodaysOrders()).then(fetchGetTellnumsData()).then(fetchOrderedUsers());
 
 
 //enter押しでsubmitしないようにする。
@@ -85,14 +107,14 @@ const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
 
-//indexページ Usersデータ反映 チェックボックス a helper function that creates a list item for a given user
+//indexページ Usersデータ反映 チェックボックス
 const appendUserRadio = (id, user) => {
   // console.log(id, user);
   const parent = document.getElementById("usersArea");
   const div = document.createElement("div");
     div.className = "form-check mx-3 mb-4 d-flex align-items-center";
   const input = document.createElement("input");
-    input.className = "form-check-input";
+    input.className = "form-check-input selectUserName";
     input.type = "checkbox";
     input.name = "selectUserName"
     input.value = user;
@@ -101,7 +123,7 @@ const appendUserRadio = (id, user) => {
     label.innerText = user;
     label.name = "userLabel";
   const noOrderBadge = document.createElement("input");
-    noOrderBadge.className = "border-0 bg-secondary rounded text-white text-center ";
+    noOrderBadge.className = "selectUserBadge border-0 bg-dark rounded text-white text-center";
     noOrderBadge.style = "width:50px;"
     noOrderBadge.type = "button";
     noOrderBadge.name = "selectUserBadge";
@@ -204,46 +226,10 @@ ordersUpdateBtn.addEventListener("click", () => {
     console.log(ordersUpdateArray);
     window.location.href = `/orders/update/${ordersUpdateArray}`;
   }  
-  //ユーザー：１　 & メニュー：１のとき
-  // if(checked_selectUserName.length == 1　&&　checked_selectStoreMenuPrice.length == 1) {
-  //   document.getElementById("errormessage").textContent = "";
-  //   ordersUpdateArray.push(thisDay);
-  //   for (const data_selectUserName of checked_selectUserName) {
-  //     ordersUpdateArray.push(data_selectUserName.value);
-  //   }
-  //   for (const data_selectStoreMenuPrice of checked_selectStoreMenuPrice) {
-  //     const ary = data_selectStoreMenuPrice.value.split(',');
-  //     for (let i = 0; i < ary.length; i++) {
-  //       ordersUpdateArray.push(ary[i]);
-  //     }
-  //   }
-  //   for (const data_selectChangeValue of selectChangeValue) {
-  //     ordersUpdateArray.push(data_selectChangeValue.value);
-  //   }
-  //   console.log(ordersUpdateArray); //['2021-12-22', '内藤　晋介', 'あおやま', '中華弁当', '500', '500']
-  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
-  // }; 
-  //ユーザー：１ & メニュー：２つ以上のとき
-  // if(checked_selectUserName.length == 1　&&　checked_selectStoreMenuPrice.length > 1 ) {
-  //   document.getElementById("errormessage").textContent = "";
-  //   for (let i = 0; i < checked_selectStoreMenuPrice.length; i++) {
-  //       console.log(checked_selectStoreMenuPrice.length); //選択したメニューの数「２」や「３」
-  //       ordersUpdateArray.push(thisDay);     
-  //       ordersUpdateArray.push(checked_selectUserName[0].value);      
-  //       for (let h = 0; h < checked_selectStoreMenuPrice[i].value.split(',').length; h++) { //checked_selectStoreMenuPriceを「あおやま」、「中華弁当」、「500」のそれぞれに分割して配列にpush
-  //         console.log(checked_selectStoreMenuPrice[i].value.split(',').length); //「あおやま」、「中華弁当」、「500」 等の「３」
-  //         console.log(checked_selectStoreMenuPrice[i].value.split(',')[h]) //「あおやま」、「中華弁当」、「500」 
-  //         ordersUpdateArray.push(checked_selectStoreMenuPrice[i].value.split(',')[h]); 
-  //       }
-  //       console.log(selectChangeValue[0].value); //お釣り「500」など。二つ目以降のメニューにお釣りを入れない処理はサーバーで。
-  //       ordersUpdateArray.push(selectChangeValue[0].value);  
-  //   }
-  //   console.log(ordersUpdateArray);
-  //   window.location.href = `/orders/update/${ordersUpdateArray}`;
-  // };
 });
 
-// ★注文なしバッジのイベント
+
+// 注文なしバッジのイベント
 function noOrder(user) {
   console.log(user);
   const ordersUpdateArray = [];
@@ -261,9 +247,9 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     tr_store.className = `ordered_${store} row`;
   const strong_store = document.createElement("strong");
     strong_store.innerText = store;
-    strong_store.className = "font-weight-bold eachStoreName col-8";
+    strong_store.className = "font-weight-bold eachStoreName col-9 px-3";
   const strong_tellnum = document.createElement("strong");
-    strong_tellnum.className = "tellnumArea col-4";
+    strong_tellnum.className = "tellnumArea col-3";
     strong_tellnum.innerText = "";
   const tr_order = document.createElement("tr");
   const td_id = document.createElement("td");
@@ -301,7 +287,7 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     tr_order.append(td_orderedCheck);
     td_orderedCheck.append(input_ordered);
     td_orderedCheck.append(label_ordered);
-  } else {
+  } else { //td_userが0のとき
     parent.appendChild(tr_order);
     tr_order.append(td_id);
     tr_order.append(td_user);
@@ -311,20 +297,32 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     td_orderedCheck.append(input_ordered);
     td_orderedCheck.append(label_ordered);
   }
-  const userLabel = document.getElementsByClassName("userLabel");
-    for (let i = 0; i < userLabel.length; i++) {
-      if (user == userLabel[i].innerText) {
-        userLabel[i].className = "form-check-label userLabel mx-4 orderedUser text-decoration-line-through text-secondary";
-    }
-  }  
   if (ordered_check == 1) {
     input_ordered.checked = true;
-  }  
+  }
+};
+
+
+//注文した人の要素を変更（取り消し線を引く、文字色を薄くするなど）
+const appendOrderedUserTransform = (user) => {
+  const selectUserName = document.getElementsByClassName("selectUserName");
+  const userLabel = document.getElementsByClassName("userLabel");
+  const selectUserBadge = document.getElementsByClassName("selectUserBadge");
+    for (let i = 0; i < userLabel.length; i++) {
+      if (user == userLabel[i].innerText) { //注文したuserに取り消し線など
+        selectUserName[i].disabled = "disabled";
+        userLabel[i].className = "form-check-label userLabel mx-4 orderedUser text-decoration-line-through text-secondary";
+        // console.log(selectUserBadge[i]); //<input class="selectUserBadge ・・・ value="注文なし" ・・・ >
+        selectUserBadge[i].className = "selectUserBadge border-0 bg-secondary rounded text-white text-center";
+        selectUserBadge[i].onclick = "";
+        selectUserBadge[i].style = "cursor: default";
+      }
+    }
 };
 
 
 //本日の集計　お釣り
-const appendTodaysChanges = (id, user, change, changed_check)=> {
+const appendTodaysChanges = (id, user, change, changed_check) => {
   const parent = document.getElementById("appendTodaysChangesArea");
   const tr = document.createElement("tr");
   const td_id = document.createElement("td");

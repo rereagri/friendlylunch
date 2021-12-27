@@ -23,8 +23,6 @@
     />
     <!-- import the webpage's stylesheet -->
     <link rel="stylesheet" href="/style.css" />
-    <!-- import the webpage's client-side javascript file -->
-    <!--<script defer src="/client.js"></script> -->
   </head>
   
   <body>
@@ -41,7 +39,16 @@
     
     <div class="container lead text-secondary d-flex align-items-center justify-content-center pt-5">
       実績
-    </div> 
+    </div>
+    
+    
+    <!-- セレクトボックス -->
+    <div class="container col-7 pt-4">
+      <select id="usersSelectBox" onChange="selectUser(this.value)" class="form-select" aria-label="Default select example">
+        <option value="all">all</option>
+      </select>
+    </div>
+
 
     <!--Ordersの出力・編集 -->
     <div class="container pt-5">
@@ -63,12 +70,10 @@
       </form>
     </div>
     
-    <!--★ページネーション設置場所 -->
-<!--     <div class="container text-center" id="pageNumbers"></div> -->
-    
-<!-- 　　　　　　　<button onclick="deleteRow()">リセット</button> -->
+    <!--ページネーション設置場所 -->
+    <div class="container text-center pt-4" id="pageNumbers"></div>
 
-    <div class="container pt-3">
+    <div class="container pt-5 text-center">
       <a href="/index">
         <button class="btn btn-dark mb-4">ホーム</button>
       </a>
@@ -90,78 +95,134 @@
     ></script>
     
     
-    <script>
+    <script>    
+      
       //enter押しでsubmitしないようにする。
       document.onkeypress = submit_cancel;
       function submit_cancel(){
           if( window.event.keyCode == 13 ){
               return false;
           }
-      };     
+      };    
       
-      // このページでOrdersデータを呼び出し
-      fetch("/getOrdersData", {})
-        .then(res => res.json())
-        .then(response => {
-          response.forEach(row => {
-             getOrdersData(row.id, row.date, row.user, row.store, row.menu, row.price, row.change);
+      
+      //ページネーション
+      //ページ番号　　Ordersのid数の呼び出し
+      async function fetchGetOrdersIdNumbers (userName) {
+        fetch(`/getOrdersIdNumbers/${userName}`, {})
+          .then(res => res.json())
+          .then(response => {
+            response.forEach(row => {
+              console.log("id数:" + Object.values(row)[0]); //id数
+              const ordersIdNumbers = Object.values(row)[0]; //id数
+              pageNumbersRender(userName, ordersIdNumbers);
+            });
           });
-        });
+      }
       
-      //★ ページ番号　　Ordersのid数の呼び出し
-      // fetch("/getOrdersIdNumbers", {})
-      //   .then(res => res.json())
-      //   .then(response => {
-      //     response.forEach(row => {
-      //       console.log(Object.values(row)[0]);
-      //       const ordersIdNumbers = Object.values(row)[0];
-      //       pageNumbers(ordersIdNumbers);
-      //     });
-      //   });
       
-      //★ページ番号　　記載
-      // function pageNumbers(ordersIdNumbers) {
-      //   const pages = Math.ceil(ordersIdNumbers/20); //切り上げ　1.3→2
-      //   for (let i = 1;  i <= pages; i++) {
-      //     const parent = document.getElementById("pageNumbers");
-      //     const a = document.createElement("button");
-      //       // a.type = "button";
-      //       a.className = "btn px-2";
-      //       a.name = "pageBtn"
-      //       a.id = `pageBtn_${i}`;
-      //       a.setAttribute("onclick", `createOrdersRow(${i})`);
-      //       a.innerText = i;
-      //     parent.append(a);
-      //     this.createOrdersRow(i);
-      //   }
-      // }
-     
+      //ページ番号　　記述
+      async function pageNumbersRender (userName, ordersIdNumbers) {
+        const pages = Math.ceil(ordersIdNumbers/30); //切り上げ　1.3→2
+        for (let i = 1; i <= pages; i++) {
+          const parent = document.getElementById("pageNumbers");
+          const pageNumbersBtn = document.createElement("button");
+            pageNumbersBtn.className = "btn px-3 pageNumbersBtn";
+            pageNumbersBtn.name = "pageNumbersBtn"
+            pageNumbersBtn.id = `pageBtn_${i}`;
+            pageNumbersBtn.onclick = () => this.createOrdersRow(userName, i) + this.pageNumberBtnBgc(i);
+            pageNumbersBtn.innerText = i;
+          parent.append(pageNumbersBtn);
+        }
+        if (ordersIdNumbers) {
+          const pageNumbersBtn1 = document.getElementById("pageBtn_1");
+          pageNumbersBtn1.className = "btn px-2 pageNumbersBtn bg-secondary";
+        }
+      };
       
-      //★ 
-      // function deleteRow() {
-      //   // console.log("test");
-      //   const ordersRow = document.getElementsByClassName("ordersRow");
-      //   while (ordersRow.length) {
-      //   ordersRow.item(0).remove();
-      // }
-      // };
-     
-        
-      //★
-      // async function createOrdersRow (i) {
-      //   // const result = await location.reload();
-      //   // const result = await deleteRow();
-      //   const pageBtn = document.getElementById(`pageBtn_${i}`);
-      //   pageBtn.addEventListener('click', () => {
-      //     fetch(`/getOrdersData/${i}`, {})
-      //       .then(res => res.json())
-      //       .then(response => {
-      //         response.forEach(row => {
-      //            getOrdersData(row.id, row.date, row.user, row.store, row.menu, row.price, row.change);
-      //         });
-      //       });
-      //   });   
-      // }
+      
+      //records.ejsを呼び出したときの1ページ目の実績を記述
+      async function pageFirstRender (userName) {
+        fetch(`/getOrdersData/${userName}/1`, {})
+          .then(res => res.json())
+          .then(response => {
+            response.forEach(row => {
+              getOrdersData(row.id, row.date, row.user, row.store, row.menu, row.price, row.change);
+            });
+          }); 
+      };
+      
+      
+      //セレクトボックス内のユーザー情報を取得し記述
+      async function getOrdersDataForSelectBox () {
+        fetch("/getUsersData/forSelectBox", {})
+          .then(res => res.json())
+          .then(response => {
+            response.forEach(row => {
+              selectBoxUsersRender(row.user);
+            });
+          }); 
+      };
+      
+      
+      //render 実績ページに遷移したときの画面描写
+      fetchGetOrdersIdNumbers("all").then(pageNumbersRender()).then(getOrdersDataForSelectBox()).then(pageFirstRender("all"));
+      
+      
+      //render セレクトボックスでuserを選択した場合の画面描写
+      function selectUser (user) {
+        temporaryDeleteRow();
+        temporaryDeletePageNum();
+        const userName = user;
+        fetchGetOrdersIdNumbers(userName).then(pageNumbersRender()).then(pageFirstRender(userName));
+      }
+      
+      
+      //pageNumbersBtn.onclick処理
+      function createOrdersRow (userName, pageNum) {
+        temporaryDeleteRow();
+        console.log(pageNum);
+        fetch(`/getOrdersData/${userName}/${pageNum}`, {})
+          .then(res => res.json())
+          .then(response => {
+            response.forEach(row => {
+               getOrdersData(row.id, row.date, row.user, row.store, row.menu, row.price, row.change);
+            });
+          });  
+      }
+      
+      
+      //実績の行を一時的に画面上から削除（Ordersテーブルから消すわけではない）
+      function temporaryDeleteRow () {
+        const ordersRow = document.getElementsByClassName("ordersRow");
+        while (ordersRow.length) {
+        ordersRow.item(0).remove();
+        }
+      };
+      
+      
+      // ページ番号を一時的に画面上から削除
+      function temporaryDeletePageNum () {
+        const currentPageNums = document.getElementsByClassName("pageNumbersBtn");
+        while (currentPageNums.length) {
+        currentPageNums.item(0).remove();
+        }
+      };  
+      
+      
+      //pageNumberBtnのBgcの色づけ
+      function pageNumberBtnBgc (pageNum) {
+        //既存Bgcの色消し
+        const pageNumberBtnColored = document.querySelectorAll("button.bg-secondary");
+        console.log(pageNumberBtnColored[0]); //[]をつけないとNodeList。[]を付けると要素。「<button class・・・・・>4</button>」
+        for (let i = 0; i < pageNumberBtnColored.length; i++) {
+          pageNumberBtnColored[i].className = "btn px-2 pageNumbersBtn";
+        }
+        //新たに押したpageNumberBtnのBgcに色づけ
+        const pageNumbersBtn = document.getElementById(`pageBtn_${pageNum}`);
+        console.log(pageNumbersBtn); //「<button class・・・・・>5</button>」
+        pageNumbersBtn.className = "btn px-2 pageNumbersBtn bg-secondary";
+      }
       
       
       //recordsでOrdersの反映      
@@ -217,8 +278,19 @@
         tr.append(td_8);
         td_8.append(input_8);
       };
+      
+      
+      //セレクトボックス内のユーザーの描画
+      function selectBoxUsersRender (user) {
+        const parent = document.getElementById("usersSelectBox");
+        const option = document.createElement("option");
+          option.value = user;
+          option.innerText = user;
+        parent.appendChild(option);
+      };
 
-      //edit Menus デリートにチェックされたidの取得
+      
+      //デリートにチェックされたidの取得
       function deleteOrder() {
         const activeDeleteOrderBtn = document.activeElement;
         const deleteId = activeDeleteOrderBtn.name.replace("deleteOrderBtn_", "");
@@ -230,7 +302,6 @@
         }
       };
       
-
     </script>
     
   </body>

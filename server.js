@@ -117,7 +117,7 @@ function isAuthenticated(req, res, next) {
 db.serialize(() => {
   if (!exists) {
     db.run(
-      "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT)"
+      "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, refNum INTEGER)"
     );
     console.log("New table Users created!"); 
     db.run(
@@ -140,17 +140,17 @@ db.serialize(() => {
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Menus (store, menu, price) VALUES ("さくら弁当", "普通", "500"), ("さくら弁当", "おかずのみ", "280")'
+        'INSERT INTO Menus (store, menu, price) VALUES ("Astore", "普通", "500"), ("Astore", "おかずのみ", "280")'
       );
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", "さくら弁当", "普通", "500"), ("山田　太郎", "さくら弁当", "おかずのみ", "280")'
+        'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", "Astore", "普通", "500"), ("山田　太郎", "Astore", "おかずのみ", "350")'
       );
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Tellnums (store, tellnums) VALUES ("さくら弁当", "4854318")'
+        'INSERT INTO Tellnums (store, tellnums) VALUES ("Astore", "444444")'
       );
     });
   } else {
@@ -221,7 +221,7 @@ app.get("/records", isAuthenticated, (req, res) => {
 
 //サーバーサイドからフロントエンドへUserデータを送付
 app.get("/getUsersData", (request, response) => {
-  db.all("SELECT * from Users", (err, rows) => {
+  db.all("SELECT * from Users ORDER by refNum ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -233,28 +233,60 @@ app.get("/getMenusData", (request, response) => {
   });
 });
 
-//サーバーサイドからフロントエンドへOrdersデータを送付
-app.get("/getOrdersData", (request, response) => {
-  db.all("SELECT * from Orders ORDER by date DESC, id DESC", (err, rows) => {
+
+//サーバーサイドからフロントエンドへOrdersデータ30行ごとのデータ送付
+app.get("/getOrdersData/:userName/:pageNum", (request, response) => {
+  console.log(request.params.userName);
+  console.log(request.params.pageNum);
+  const userName = request.params.userName;
+  const pageNum = request.params.pageNum;
+  if (userName == "all") {
+    if (pageNum == 1) {
+      db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 30 ", (err, rows) => {
+        response.send(JSON.stringify(rows));
+      });
+    } else if (pageNum > 1) {
+      db.all(`SELECT * from Orders ORDER by date DESC, id DESC LIMIT 30 OFFSET ${30 * (pageNum - 1)}`, (err, rows) => {
+        response.send(JSON.stringify(rows));
+      });
+    }
+  } else {
+    if (pageNum == 1) {
+      db.all(`SELECT * from Orders WHERE user = "${userName}" ORDER by date DESC, id DESC LIMIT 30 `, (err, rows) => {
+        response.send(JSON.stringify(rows));
+      });
+    } else if (pageNum > 1) {
+      db.all(`SELECT * from Orders WHERE user = "${userName}" ORDER by date DESC, id DESC LIMIT 30 OFFSET ${30 * (pageNum - 1)}`, (err, rows) => {
+        response.send(JSON.stringify(rows));
+      });
+    }
+  };
+});
+
+
+//サーバーサイドからフロントエンドへusersデータを送付。セレクトボックス用。
+app.get("/getUsersData/forSelectBox", (request, response) => {
+  db.all("SELECT user from Users ORDER by refNum ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
-// ★サーバーサイドからフロントエンドへOrdersデータ20行ごとのデータ送付
-// app.get("/getOrdersData/:i", (request, response) => {
-//   console.log(request.params.i);
-//   const i = request.params.i;
-//   if (i == 1) {
-//     db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 ", (err, rows) => {
-//     response.send(JSON.stringify(rows));
-//     });
-//   } else if (i > 1) {
-//     // db.all(`SELECT * from Orders ORDER by date DESC, id DESC OFFSET ${20 * (i - 1)} LIMIT 20`, (err, rows) => {
-//     db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 20 OFFSET 20", (err, rows) => {
-//     response.send(JSON.stringify(rows));
-//     });
-//   }
-// });
+
+//Ordersのidの行数を取得
+app.get("/getOrdersIdNumbers/:userName", (request, response) => {
+  console.log(request.params.userName); //「all」
+  const userName = request.params.userName;
+  if (userName == "all") {
+    db.all("SELECT COUNT (id) from Orders", (err, idNumbers) => {
+    response.send(JSON.stringify(idNumbers));
+    }); 
+  } else {
+    db.all(`SELECT COUNT (id) from Orders WHERE user = "${userName}"`, (err, idNumbers) => {
+    response.send(JSON.stringify(idNumbers));
+    }); 
+  };
+});
+
 
 //サーバーサイドからフロントエンドへTellnumsデータを送付
 app.get("/getTellnumsData", (request, response) => {
@@ -286,21 +318,14 @@ app.get("/getTodaysStoresTotalAmount", (request, response) => {
 });
 
 
-//★ Ordersのidの行数を取得
-// app.get("/getOrdersIdNumbers", (req, res) => {
-//   db.all("SELECT COUNT (id) from Orders", (err, idNunbers) => {
-//     res.send(JSON.stringify(idNunbers));
-//   });
-// });
-
-
 //Usersテーブルの追加・更新 Upsert処理
 app.post("/users/addEdit", (req, res) => {
   const getUserId = req.body.userId;
   const getUserName = req.body.userName;
+  const getRefNum = req.body.refNum;
   for(let i = 0; i < getUserId.length; i++) {
     // console.log(getUserId[i], getUserName[i]);
-    const stmt = db.prepare("INSERT OR REPLACE INTO Users (id, user) VALUES (?, ?)", getUserId[i], getUserName[i]);
+    const stmt = db.prepare("INSERT OR REPLACE INTO Users (id, user, refNum) VALUES (?, ?, ?)", getUserId[i], getUserName[i], getRefNum[i]);
     stmt.run();
     stmt.finalize();
   }
@@ -384,6 +409,7 @@ app.post("/orders/check", (req, res) => {
   // return res.render(`${__dirname}/views/index.ejs`);
   res.redirect("/index");
 });
+
 
 //チェックのリセット
 app.get("/orders/check/reset", (req, res) => {

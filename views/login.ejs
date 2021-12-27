@@ -22,12 +22,8 @@
       integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
       crossorigin="anonymous"
     />
-
     <!-- import the webpage's stylesheet -->
     <link rel="stylesheet" href="/style.css" />
-
-    <!-- import the webpage's client-side javascript file -->
-<!--     <script  defer src="/client.js"></script> -->
   </head>
   
   
@@ -43,11 +39,8 @@
     
     
     <div class="container py-5">
-      <div class="text-secondary">
-        本アプリのサーバーは「５分間」の「不使用」で「スリープ」する仕様になっています。その日一番にアクセスした人は少しだけサーバー起動に時間がかかります。
-      </div>
       <form action="/users/authentication" method="post">
-        <div class="mb-3">
+        <div class="mb-3 d-flex align-items-center justify-content-center">
           <table>
             <thead>
               <th></th>
@@ -74,10 +67,16 @@
           </table>       
         </div>
         <br>
-        <div>
+        <br>
+        <div class="text-center">
           <input class="btn btn-dark" type="submit" value="ログイン"/>
         </div>
       </form>
+      <br>
+      <br>
+      <div class="text-secondary">
+        本アプリのサーバーは「５分間」の「不使用」で「スリープ」する仕様になっています。その日一番にアクセスした人は少しだけサーバー起動に時間がかかります。
+      </div>
     </div>
 
     
