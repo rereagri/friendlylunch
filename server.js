@@ -130,7 +130,7 @@ db.serialize(() => {
     console.log("New table Orders created!"); 
     // insert default table
     db.run(
-      "CREATE TABLE Tellnums (id INTEGER PRIMARY KEY AUTOINCREMENT, store TEXT, tellnums INTEGER)"
+      "CREATE TABLE Tellnums (id INTEGER PRIMARY KEY AUTOINCREMENT, store TEXT, tellnums INTEGER, tellnumsText TEXT)"
     );
     console.log("New table Tellnums created!")
     db.serialize(() => {
@@ -150,7 +150,7 @@ db.serialize(() => {
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Tellnums (store, tellnums) VALUES ("Astore", "444444")'
+        'INSERT INTO Tellnums (store, tellnumsText) VALUES ("Astore", "4445555")'
       );
     });
   } else {
@@ -240,7 +240,7 @@ app.get("/getOrdersData/:userName/:pageNum", (request, response) => {
   console.log(request.params.pageNum);
   const userName = request.params.userName;
   const pageNum = request.params.pageNum;
-  if (userName == "all") {
+  if (userName == "All") {
     if (pageNum == 1) {
       db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 30 ", (err, rows) => {
         response.send(JSON.stringify(rows));
@@ -264,9 +264,9 @@ app.get("/getOrdersData/:userName/:pageNum", (request, response) => {
 });
 
 
-//サーバーサイドからフロントエンドへusersデータを送付。セレクトボックス用。
-app.get("/getUsersData/forSelectBox", (request, response) => {
-  db.all("SELECT user from Users ORDER by refNum ASC", (err, rows) => {
+//サーバーサイドからフロントエンドへOrdersのuserデータを送付。セレクトボックス用。
+app.get("/getOrdersUserData/forSelectBox", (request, response) => {
+  db.all("SELECT DISTINCT user from Orders ORDER by user ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -276,7 +276,7 @@ app.get("/getUsersData/forSelectBox", (request, response) => {
 app.get("/getOrdersIdNumbers/:userName", (request, response) => {
   console.log(request.params.userName); //「all」
   const userName = request.params.userName;
-  if (userName == "all") {
+  if (userName == "All") {
     db.all("SELECT COUNT (id) from Orders", (err, idNumbers) => {
     response.send(JSON.stringify(idNumbers));
     }); 
@@ -296,7 +296,7 @@ app.get("/getTellnumsData", (request, response) => {
 });
 
 
-// 本日の注文者とメニュー id date user store menu price change
+// 本日の注文者とメニュー
 app.get("/getTodaysOrders", (request, response) => {
   db.all("SELECT * from Orders WHERE date = '"+thisDay+"' ORDER by store ASC, user ASC, price DESC", (err, rows) => {    
     response.send(JSON.stringify(rows));
@@ -324,12 +324,10 @@ app.post("/users/addEdit", (req, res) => {
   const getUserName = req.body.userName;
   const getRefNum = req.body.refNum;
   for(let i = 0; i < getUserId.length; i++) {
-    // console.log(getUserId[i], getUserName[i]);
     const stmt = db.prepare("INSERT OR REPLACE INTO Users (id, user, refNum) VALUES (?, ?, ?)", getUserId[i], getUserName[i], getRefNum[i]);
     stmt.run();
     stmt.finalize();
   }
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -346,7 +344,6 @@ app.post("/menus/addEdit", (req, res) => {
     stmt.run();
     stmt.finalize();
   }
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -356,14 +353,13 @@ app.post("/tellnums/addEdit", (req, res) => {
   // console.log(req.body);
   const getTellId = req.body.tellId;
   const getTellStoreName = req.body.tellStoreName;
-  const getTellNum = req.body.tellNum;
+  const getTellnumsText = req.body.tellnumsText;
   for(let i = 0; i < getTellId.length; i++) {
-    console.log(getTellId[i], getTellStoreName[i], getTellNum[i]);
-    const stmt = db.prepare("INSERT OR REPLACE INTO Tellnums (id, store, tellnums) VALUES (?, ?, ?)", getTellId[i], getTellStoreName[i], getTellNum[i]);
+    console.log(getTellId[i], getTellStoreName[i], getTellnumsText[i]);
+    const stmt = db.prepare("INSERT OR REPLACE INTO Tellnums (id, store, tellnumsText) VALUES (?, ?, ?)", getTellId[i], getTellStoreName[i], getTellnumsText[i]);
     stmt.run();
     stmt.finalize();
   }
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -406,7 +402,6 @@ app.post("/orders/check", (req, res) => {
       stmt.finalize();
     }
   }
-  // return res.render(`${__dirname}/views/index.ejs`);
   res.redirect("/index");
 });
 
@@ -423,7 +418,6 @@ app.get("/orders/check/reset", (req, res) => {
       stmt.finalize();
     }
   });
-  // return res.render(`${__dirname}/views/index.ejs`);
   res.redirect("/index");
 });
 
@@ -435,7 +429,6 @@ app.get("/users/delete/:deleteId", (req, res) => {
   const stmt = db.prepare("DELETE FROM Users WHERE id = (?)");
   stmt.run(deleteId);
   stmt.finalize();
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -447,7 +440,6 @@ app.get("/menus/delete/:deleteId", (req, res) => {
   const stmt = db.prepare("DELETE FROM Menus WHERE id = (?)");
   stmt.run(deleteId);
   stmt.finalize();
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -459,7 +451,6 @@ app.get("/orders/delete/:deleteId", (req, res) => {
   const stmt = db.prepare("DELETE FROM Orders WHERE id = (?)");
   stmt.run(deleteId);
   stmt.finalize();
-  // return res.render(`${__dirname}/views/records.ejs`);
   res.redirect("/records");
 });
 
@@ -471,7 +462,6 @@ app.get("/tellnums/delete/:deleteId", (req, res) => {
   const stmt = db.prepare("DELETE FROM Tellnums WHERE id = (?)");
   stmt.run(deleteId);
   stmt.finalize();
-  // return res.render(`${__dirname}/views/edit.ejs`);
   res.redirect("/edit");
 });
 
@@ -516,7 +506,6 @@ app.get("/orders/update/:ordersUpdateArray", (req, res) => {
     stmt.run();
     stmt.finalize();
   }
-  // return res.render(`${__dirname}/views/index.ejs`);
   res.redirect("/index");
 });
 

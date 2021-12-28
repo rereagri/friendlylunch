@@ -59,7 +59,7 @@ async function fetchGetTellnumsData () {
     .then(res => res.json())
     .then(response => {
       response.forEach(row => {
-        appendTellnums(row.store, row.tellnums);
+        appendTellnums(row.store, row.tellnumsText);
       });
     });
 };
@@ -77,7 +77,7 @@ async function fetchOrderedUsers () {
 };
 
 
-fetchGetUsersData().then(fetchGetMenusData()).then(fetchGetTodaysOrders()).then(fetchGetTellnumsData()).then(fetchOrderedUsers());
+fetchGetUsersData().then(fetchGetMenusData()).then(fetchGetTodaysOrders()).then(fetchOrderedUsers()).then(fetchGetTellnumsData());
 
 
 //enter押しでsubmitしないようにする。
@@ -244,13 +244,14 @@ function noOrder(user) {
 const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
   const parent = document.getElementById("appendTodaysOrdersArea");
   const tr_store = document.createElement("tr");
-    tr_store.className = `ordered_${store} row`;
-  const strong_store = document.createElement("strong");
-    strong_store.innerText = store;
-    strong_store.className = "font-weight-bold eachStoreName col-9 px-3";
-  const strong_tellnum = document.createElement("strong");
-    strong_tellnum.className = "tellnumArea col-3";
-    strong_tellnum.innerText = "";
+    tr_store.className = `ordered_${store}`;
+  const th_store = document.createElement("th");
+    th_store.innerText = store;
+    th_store.className = "font-weight-bold eachStoreName";
+  const th_tellnum = document.createElement("th");
+    th_tellnum.className = "tellnumArea";
+    th_tellnum.colSpan = "3";
+    th_tellnum.innerText = "";
   const tr_order = document.createElement("tr");
   const td_id = document.createElement("td");
     td_id.hidden = true;
@@ -258,7 +259,7 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
   const td_user = document.createElement("td");
     td_user.textContent = user;
     td_user.name = "orderedUser";
-    td_user.className = "orderedUser col-5";
+    td_user.className = "orderedUser px-3 col-5";
   const td_menu = document.createElement("td");
     td_menu.textContent = menu;
     td_menu.className = "col-4"
@@ -277,8 +278,8 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
   const orderedStore = document.getElementsByClassName(`ordered_${store}`);
   if (orderedStore.length == 0) {
     parent.appendChild(tr_store);
-    tr_store.append(strong_store);
-    tr_store.append(strong_tellnum);
+    tr_store.append(th_store);
+    tr_store.append(th_tellnum);
     parent.appendChild(tr_order);
     tr_order.append(td_id);
     tr_order.append(td_user);
@@ -381,12 +382,12 @@ const ordersResetBtn = document.getElementById("ordersResetBtn");
 
 
 //indexページ Tellnumsデータ反映 集計場所に電話番号記述
-const appendTellnums = (store, tellnums) => {
+const appendTellnums = (store, tellnumsText) => {
   const eachStoreName = document.getElementsByClassName("eachStoreName"); //HTMLCollection。そのままでは要素を扱えない。for文を使う。
   const tellnumArea = document.getElementsByClassName("tellnumArea");
   for (let i = 0; i < eachStoreName.length; i++) {
     if (store === eachStoreName[i].innerText) {
-      tellnumArea[i].innerText = "TEL" + tellnums;
+      tellnumArea[i].innerText = tellnumsText;
     }
   }
 };
