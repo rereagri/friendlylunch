@@ -473,12 +473,6 @@ app.get("/orders/allDelete", isAuthenticated, (req, res) => {
     res.redirect("/records");
   }
   allDelete().then(vacuum());
-  // const stmt = db.prepare("DELETE FROM Orders");
-  // const stmt2 = db.prepare("VACUUM");
-  // stmt.run();
-  // stmt2.run();
-  // stmt.finalize();
-  // res.redirect("/records");
 });
 
 
