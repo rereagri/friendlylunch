@@ -100,9 +100,9 @@ const minute = ("0" + today.getMinutes()).slice(-2);
 //年・月・日・曜日を取得
 const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
 //年・月・日・曜日を書き出す
-document.getElementById("todayDate").textContent =
-  year + "年" + month + "月" + day + "日 " + week_ja[week] + "曜日";
+document.getElementById("todayDate").textContent =　year + "年" + month + "月" + day + "日 " + week_ja[week] + "曜日";
 document.getElementById("todayTime").textContent = hour + "時" + minute + "分";
+document.getElementById("todayDate2").textContent =　"本日" + month + "月" + day + "日 " + "の当番用";
 const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
@@ -199,7 +199,6 @@ const appendMenuAccordionHeader = (id, store, menu, price) => {
 //注文決定btn 　ordersテーブルのupdate情報をサーバーに送付
 const ordersUpdateBtn = document.getElementById("ordersUpdateBtn");
 ordersUpdateBtn.addEventListener("click", () => {
-  // const thisDay = year + "-" + month + "-" + day;
   const checked_selectUserName = document.querySelectorAll("input[name=selectUserName]:checked");
   const checked_selectStoreMenuPrice = document.querySelectorAll("input[name=selectStoreMenuPrice]:checked");
   const selectChangeValue = document.querySelectorAll("input[name=selectChangeValue]");
@@ -253,13 +252,18 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     th_tellnum.colSpan = "3";
     th_tellnum.innerText = "";
   const tr_order = document.createElement("tr");
+    tr_order.className = `ordered_${store}_${user}`;
   const td_id = document.createElement("td");
     td_id.hidden = true;
     td_id.textContent = id;
   const td_user = document.createElement("td");
     td_user.textContent = user;
     td_user.name = "orderedUser";
-    td_user.className = "orderedUser px-3 col-5";
+    td_user.className = "orderedUser px-4 col-5";
+  const td_user_same = document.createElement("td");
+    td_user_same.textContent = "";
+    td_user_same.name = "orderedUserSame";
+    td_user_same.className = "orderedUserSame px-4 col-5";
   const td_menu = document.createElement("td");
     td_menu.textContent = menu;
     td_menu.className = "col-4"
@@ -276,6 +280,11 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     label_ordered.className = "form-check-label";
     label_ordered.innerText = "";
   const orderedStore = document.getElementsByClassName(`ordered_${store}`);
+  const orderedStoreUser = document.getElementsByClassName(`ordered_${store}_${user}`);
+  // console.log(orderedStore);
+  // console.log(orderedStore.length);
+  // console.log(orderedStoreUser);
+  // console.log(orderedStoreUser.length);
   if (orderedStore.length == 0) {
     parent.appendChild(tr_store);
     tr_store.append(th_store);
@@ -288,15 +297,26 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     tr_order.append(td_orderedCheck);
     td_orderedCheck.append(input_ordered);
     td_orderedCheck.append(label_ordered);
-  } else { //td_userが0のとき
-    parent.appendChild(tr_order);
-    tr_order.append(td_id);
-    tr_order.append(td_user);
-    tr_order.append(td_menu);
-    tr_order.append(td_price);
-    tr_order.append(td_orderedCheck);
-    td_orderedCheck.append(input_ordered);
-    td_orderedCheck.append(label_ordered);
+  } else if (orderedStore.length > 0) {
+    if (orderedStoreUser.length == 0) {
+      parent.appendChild(tr_order);
+      tr_order.append(td_id);
+      tr_order.append(td_user);
+      tr_order.append(td_menu);
+      tr_order.append(td_price);
+      tr_order.append(td_orderedCheck);
+      td_orderedCheck.append(input_ordered);
+      td_orderedCheck.append(label_ordered);
+    } else if (orderedStoreUser.length > 0) {
+      parent.appendChild(tr_order);
+      tr_order.append(td_id);
+      tr_order.append(td_user_same);
+      tr_order.append(td_menu);
+      tr_order.append(td_price);
+      tr_order.append(td_orderedCheck);
+      td_orderedCheck.append(input_ordered);
+      td_orderedCheck.append(label_ordered);
+    }
   }
   if (ordered_check == 1) {
     input_ordered.checked = true;

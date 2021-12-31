@@ -140,7 +140,7 @@ db.serialize(() => {
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Menus (store, menu, price) VALUES ("Astore", "普通", "500"), ("Astore", "おかずのみ", "350"), ("Bstore", "日替わり", "450")'
+        'INSERT INTO Menus (store, menu, price) VALUES ("Astore", "普通", "500"), ("Astore", "おかずのみ", "350"), ("Bstore", "日替わり", "450"), ("注文なし", "注文なし", "0")'
       );
     });
     db.serialize(() => {
@@ -244,6 +244,7 @@ app.get("/getOrdersData/:userName/:pageNum", isAuthenticated, (request, response
   if (userName == "All") {
     if (pageNum == 1) {
       db.all("SELECT * from Orders ORDER by date DESC, id DESC LIMIT 30 ", (err, rows) => {
+        //idが降順（大きなidが上）、かつ、同じuser内で先に注文したメニューを上（シリザナであればカレー名を上にして辛さを下・idを昇順・大きなidが下）に並べるのは矛盾するので無理。よって単純にidの降順で並べることで妥協。）
         response.send(JSON.stringify(rows));
       });
     } else if (pageNum > 1) {
@@ -458,11 +459,26 @@ app.get("/orders/delete/:deleteId", isAuthenticated, (req, res) => {
 
 //Ordersテーブルの「全」削除
 app.get("/orders/allDelete", isAuthenticated, (req, res) => {
-  console.log("Orders data ALL Delete");
-  const stmt = db.prepare("DELETE FROM Orders");
-  stmt.run();
-  stmt.finalize();
-  res.redirect("/records");
+  async function allDelete () {
+    console.log("Orders data ALL Delete");
+    const stmt = db.prepare("DELETE FROM Orders");
+    stmt.run();
+    stmt.finalize();
+  };
+  async function vacuum () {
+    console.log("Vacuum");
+    const stmt2 = db.prepare("VACUUM");
+    stmt2.run();
+    stmt2.finalize();
+    res.redirect("/records");
+  }
+  allDelete().then(vacuum());
+  // const stmt = db.prepare("DELETE FROM Orders");
+  // const stmt2 = db.prepare("VACUUM");
+  // stmt.run();
+  // stmt2.run();
+  // stmt.finalize();
+  // res.redirect("/records");
 });
 
 
