@@ -135,22 +135,22 @@ db.serialize(() => {
     console.log("New table Tellnums created!")
     db.serialize(() => {
       db.run(
-        'INSERT INTO Users (user) VALUES ("ユーザー１"), ("ユーザー２"), ("ユーザー３")'
+        'INSERT INTO Users (user) VALUES ("ユーザー1"), ("ユーザー2"), ("ユーザー3")'
       );
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Menus (store, menu, price) VALUES ("Astore", "普通", "500"), ("Astore", "おかずのみ", "280")'
+        'INSERT INTO Menus (store, menu, price) VALUES ("Astore", "普通", "500"), ("Astore", "おかずのみ", "350"), ("Bstore", "日替わり", "450")'
       );
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Orders (user, store, menu, price) VALUES ("山田　太郎", "Astore", "普通", "500"), ("山田　太郎", "Astore", "おかずのみ", "350")'
+        'INSERT INTO Orders (user, store, menu, price) VALUES ("ユーザー１", "Astore", "普通", "500"), ("ユーザー2", "Astore", "おかずのみ", "350")'
       );
     });
     db.serialize(() => {
       db.run(
-        'INSERT INTO Tellnums (store, tellnumsText) VALUES ("Astore", "4445555")'
+        'INSERT INTO Tellnums (store, tellnumsText) VALUES ("Astore", "4445555"), ("Bstore", "6667777")'
       );
     });
   } else {
@@ -158,11 +158,6 @@ db.serialize(() => {
     console.log('Database "Menus" ready to go!');
     console.log('Database "Orders" ready to go!');
     console.log('Database "Tellnums" ready to go!');
-    // db.each("SELECT * from Users", (err, row) => {
-    //   if (row) {
-    //     console.log(`record: ${row.user}`);
-    //   }
-    // });
   }
 });
 
@@ -196,10 +191,10 @@ app.get('/users/success', (req, res) => {
 });
 
 //ログアウト
-// app.post('/logout', (req, res) => {
-//   req.session.passport.user = undefined;
-//   res.render(`${__dirname}/views/login.ejs`);
-// });
+app.get('/logout', (req, res) => {
+  req.session.passport.user = undefined;
+  res.render(`${__dirname}/views/login.ejs`);
+});
 
 // インデックスページへの遷移
 app.get("/index", isAuthenticated, (req, res) => {
@@ -216,6 +211,12 @@ app.get("/edit", isAuthenticated, (req, res) => {
 // 実績ページへの遷移
 app.get("/records", isAuthenticated, (req, res) => {
   res.render(`${__dirname}/views/records.ejs`, { login_people: req.user });
+});
+
+
+// 実績全削除ページへの遷移
+app.get("/recordsAllDelete", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/recordsAllDelete.ejs`, { login_people: req.user });
 });
 
 
@@ -452,6 +453,17 @@ app.get("/orders/delete/:deleteId", (req, res) => {
   stmt.run(deleteId);
   stmt.finalize();
   res.redirect("/records");
+});
+
+
+//Ordersテーブルの「全」削除
+app.get("/orders/allDelete", (req, res) => {
+  console.log("Orders data ALL Delete");
+  const stmt = db.prepare("DELETE FROM Orders");
+  stmt.run();
+  stmt.finalize();
+  res.redirect("/records");
+  // res.redirect("/recordsAllDelete");
 });
 
 

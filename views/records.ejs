@@ -25,18 +25,23 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   
+  
   <body>
+    
+    <!-- ヘッダー -->
     <header>
       <nav class="navbar navbar-light bg-dark">
         <div class="container-fluid d-flex align-items-center justify-content-center py-2">
           <a class="navbar-brand text-white" href="/index">Friendly Lunch</a>
-          <a class="m-2 text-muted" href="/index">ホーム</a>
           <a class="m-2 text-muted" href="/edit">編集</a>
           <a class="m-2 text-muted" href="/records">実績</a>
+          <a class="m-2 text-muted" href="/logout">Logout</a>
         </div>
       </nav>
-    </header>
+    </header>  
     
+    
+    <!-- タイトル -->
     <div class="container lead text-secondary d-flex align-items-center justify-content-center pt-5">
       実績
     </div>
@@ -70,16 +75,29 @@
       </form>
     </div>
     
+    
     <!--ページネーション設置場所 -->
     <div class="container text-center pt-4" id="pageNumbers"></div>
 
+    
+    <!-- ホーム遷移 -->
     <div class="container pt-5 text-center">
       <a href="/index">
         <button class="btn btn-dark mb-4">ホーム</button>
       </a>
     </div>
     <br>
+    
+    
+    <!-- 実績全削除ページへの遷移 -->
+    <div class="container text-center p-0">
+      <a href="/recordsAllDelete" class="text-muted">全ての注文実績を削除する場合は・・・</a>      
+    </div>
+    <br>
+    <br>
 
+    
+    <!-- フッター -->
     <footer class="footer mt-auto py-3 bg-light">
       <div
         class="container d-flex align-items-center justify-content-center text-muted"
@@ -87,7 +105,9 @@
         Copyright ©Friendly Lunch
       </div>
     </footer>
+    
 
+    <!-- bootstrap -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
