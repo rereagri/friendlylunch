@@ -2,7 +2,7 @@
 <html lang="en">
   
   <head>
-    <title>Friendly Lunch</title>
+    <title><%= process.env.APPTITLE %></title>
     <meta name="description" content="A cool thing made with Glitch" />
     <!--<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon"> -->
     <link
@@ -33,7 +33,7 @@
     <header>
       <nav class="navbar navbar-light bg-dark">
         <div class="container-fluid d-flex align-items-center justify-content-center py-2">
-          <a class="navbar-brand text-white" href="">Friendly Lunch</a>
+          <a class="navbar-brand text-white" href=""><%= process.env.APPTITLE %></a>
         </div>
       </nav>
     </header> 
@@ -89,7 +89,7 @@
       <div
         class="container d-flex align-items-center justify-content-center text-muted"
       >
-        Copyright ©Friendly Lunch
+        Copyright ©<%= process.env.APPTITLE %>
       </div>
     </footer>
 
@@ -111,6 +111,21 @@
           }
       };
     </script>
+    
+    
+    <script>
+      // アカウント又はパスワードに誤りがある場合
+      const url = location.href;
+      const result = url.indexOf("failure"); //indexOf 値が見つからない場合は-1を返す
+      if (result != -1) {
+        console.log("failure");
+        const result = window.confirm("「アカウント」又は「パスワード」に誤りがあります。");
+        if (result) {
+          window.location.href = "/";
+        }
+      };
+    </script>
+    
     
   </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
   
   <head>
-    <title>Friendly Lunch</title>
+    <title><%= process.env.APPTITLE %></title>
     <meta name="description" content="A cool thing made with Glitch" />
     <!--<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon"> -->
     <link
@@ -32,7 +32,7 @@
     <header>
       <nav class="navbar navbar-light bg-dark">
         <div class="container-fluid d-flex align-items-center justify-content-center py-2">
-          <a class="navbar-brand text-white" href="/index">Friendly Lunch</a>
+          <a class="navbar-brand text-white" href="/index"><%= process.env.APPTITLE %></a>
           <a class="m-2 text-muted" href="/edit">編集</a>
           <a class="m-2 text-muted" href="/records">実績</a>
           <a class="m-2 text-muted" href="/logout">Logout</a>
@@ -102,7 +102,7 @@
       <div
         class="container d-flex align-items-center justify-content-center text-muted"
       >
-        Copyright ©Friendly Lunch
+        Copyright ©<%= process.env.APPTITLE %>
       </div>
     </footer>
     

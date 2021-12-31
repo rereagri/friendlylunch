@@ -106,7 +106,7 @@ function isAuthenticated(req, res, next) {
     const userName = process.env.KEY1;
     if(userName == null) {
       // res.send('ログインしてください');
-      res.redirect("/edit");
+      res.redirect("/");
     } else {
       return next();
     }};
@@ -191,7 +191,7 @@ app.get('/users/success', (req, res) => {
 });
 
 //ログアウト
-app.get('/logout', (req, res) => {
+app.get('/logout', isAuthenticated, (req, res) => {
   req.session.passport.user = undefined;
   res.render(`${__dirname}/views/login.ejs`);
 });
@@ -221,14 +221,14 @@ app.get("/recordsAllDelete", isAuthenticated, (req, res) => {
 
 
 //サーバーサイドからフロントエンドへUserデータを送付
-app.get("/getUsersData", (request, response) => {
+app.get("/getUsersData", isAuthenticated, (request, response) => {
   db.all("SELECT * from Users ORDER by refNum ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
 //サーバーサイドからフロントエンドへMenusデータを送付
-app.get("/getMenusData", (request, response) => {
+app.get("/getMenusData", isAuthenticated, (request, response) => {
   db.all("SELECT * from Menus ORDER by store ASC, price DESC, menu ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
@@ -236,7 +236,7 @@ app.get("/getMenusData", (request, response) => {
 
 
 //サーバーサイドからフロントエンドへOrdersデータ30行ごとのデータ送付
-app.get("/getOrdersData/:userName/:pageNum", (request, response) => {
+app.get("/getOrdersData/:userName/:pageNum", isAuthenticated, (request, response) => {
   console.log(request.params.userName);
   console.log(request.params.pageNum);
   const userName = request.params.userName;
@@ -266,15 +266,15 @@ app.get("/getOrdersData/:userName/:pageNum", (request, response) => {
 
 
 //サーバーサイドからフロントエンドへOrdersのuserデータを送付。セレクトボックス用。
-app.get("/getOrdersUserData/forSelectBox", (request, response) => {
+app.get("/getOrdersUserData/forSelectBox", isAuthenticated, (request, response) => {
   db.all("SELECT DISTINCT user from Orders ORDER by user ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
 
-//Ordersのidの行数を取得
-app.get("/getOrdersIdNumbers/:userName", (request, response) => {
+//Ordersのid数を取得
+app.get("/getOrdersIdNumbers/:userName", isAuthenticated, (request, response) => {
   console.log(request.params.userName); //「all」
   const userName = request.params.userName;
   if (userName == "All") {
@@ -290,7 +290,7 @@ app.get("/getOrdersIdNumbers/:userName", (request, response) => {
 
 
 //サーバーサイドからフロントエンドへTellnumsデータを送付
-app.get("/getTellnumsData", (request, response) => {
+app.get("/getTellnumsData", isAuthenticated, (request, response) => {
   db.all("SELECT * from Tellnums", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
@@ -298,21 +298,21 @@ app.get("/getTellnumsData", (request, response) => {
 
 
 // 本日の注文者とメニュー
-app.get("/getTodaysOrders", (request, response) => {
+app.get("/getTodaysOrders", isAuthenticated, (request, response) => {
   db.all("SELECT * from Orders WHERE date = '"+thisDay+"' ORDER by store ASC, user ASC, price DESC", (err, rows) => {    
     response.send(JSON.stringify(rows));
   });
 });
 
 // 本日のお釣り user change
-app.get("/getTodaysChanges", (request, response) => {
+app.get("/getTodaysChanges", isAuthenticated, (request, response) => {
   db.all("SELECT id, user, change, changed_check from Orders WHERE date = '"+thisDay+"' and change is not '' ORDER by user ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
 
 // 本日の店別・合計金額  store sum
-app.get("/getTodaysStoresTotalAmount", (request, response) => {
+app.get("/getTodaysStoresTotalAmount", isAuthenticated, (request, response) => {
   db.all("SELECT store, sum(price) as sum from Orders WHERE date = '"+thisDay+"' GROUP by store ORDER by store ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
@@ -320,7 +320,7 @@ app.get("/getTodaysStoresTotalAmount", (request, response) => {
 
 
 //Usersテーブルの追加・更新 Upsert処理
-app.post("/users/addEdit", (req, res) => {
+app.post("/users/addEdit", isAuthenticated, (req, res) => {
   const getUserId = req.body.userId;
   const getUserName = req.body.userName;
   const getRefNum = req.body.refNum;
@@ -334,7 +334,7 @@ app.post("/users/addEdit", (req, res) => {
 
 
 //Menusテーブルの追加・更新 Upsert処理
-app.post("/menus/addEdit", (req, res) => {
+app.post("/menus/addEdit", isAuthenticated, (req, res) => {
   const getMenuId = req.body.menuId;
   const getMenuStore = req.body.menuStore;
   const getMenuName = req.body.menuName;
@@ -350,7 +350,7 @@ app.post("/menus/addEdit", (req, res) => {
 
 
 //Tellnumsテーブルの追加・更新 Upsert処理
-app.post("/tellnums/addEdit", (req, res) => {
+app.post("/tellnums/addEdit", isAuthenticated, (req, res) => {
   // console.log(req.body);
   const getTellId = req.body.tellId;
   const getTellStoreName = req.body.tellStoreName;
@@ -366,7 +366,7 @@ app.post("/tellnums/addEdit", (req, res) => {
 
 
 //チェック　Ordersテーブルのordered_checkとchanged_checkの追加・更新 Update処理
-app.post("/orders/check", (req, res) => {
+app.post("/orders/check", isAuthenticated, (req, res) => {
   const ordered_checkId = req.body.ordered_check; //単数選択101,複数選択[ '101', '103', '102' ]
   const changed_checkId = req.body.changed_check;
   if (ordered_checkId == undefined) {
@@ -408,7 +408,7 @@ app.post("/orders/check", (req, res) => {
 
 
 //チェックのリセット
-app.get("/orders/check/reset", (req, res) => {
+app.get("/orders/check/reset", isAuthenticated, (req, res) => {
   db.all("SELECT * from Orders WHERE date = '"+thisDay+"'", (err, rows) => {
     for (let i = 0; i < JSON.stringify(rows.length); i++) {
       console.log(i);
@@ -424,7 +424,7 @@ app.get("/orders/check/reset", (req, res) => {
 
 
 //Usersテーブルの削除
-app.get("/users/delete/:deleteId", (req, res) => {
+app.get("/users/delete/:deleteId", isAuthenticated, (req, res) => {
   const deleteId = req.params.deleteId;
   console.log(deleteId);
   const stmt = db.prepare("DELETE FROM Users WHERE id = (?)");
@@ -435,7 +435,7 @@ app.get("/users/delete/:deleteId", (req, res) => {
 
 
 //Menusテーブルの削除
-app.get("/menus/delete/:deleteId", (req, res) => {
+app.get("/menus/delete/:deleteId", isAuthenticated, (req, res) => {
   const deleteId = req.params.deleteId;
   console.log(deleteId);
   const stmt = db.prepare("DELETE FROM Menus WHERE id = (?)");
@@ -446,7 +446,7 @@ app.get("/menus/delete/:deleteId", (req, res) => {
 
 
 //Ordersテーブルの削除
-app.get("/orders/delete/:deleteId", (req, res) => {
+app.get("/orders/delete/:deleteId", isAuthenticated, (req, res) => {
   const deleteId = req.params.deleteId;
   console.log(deleteId);
   const stmt = db.prepare("DELETE FROM Orders WHERE id = (?)");
@@ -457,18 +457,17 @@ app.get("/orders/delete/:deleteId", (req, res) => {
 
 
 //Ordersテーブルの「全」削除
-app.get("/orders/allDelete", (req, res) => {
+app.get("/orders/allDelete", isAuthenticated, (req, res) => {
   console.log("Orders data ALL Delete");
   const stmt = db.prepare("DELETE FROM Orders");
   stmt.run();
   stmt.finalize();
   res.redirect("/records");
-  // res.redirect("/recordsAllDelete");
 });
 
 
 //Tellnumsテーブルの削除
-app.get("/tellnums/delete/:deleteId", (req, res) => {
+app.get("/tellnums/delete/:deleteId", isAuthenticated, (req, res) => {
   const deleteId = req.params.deleteId;
   console.log(deleteId);
   const stmt = db.prepare("DELETE FROM Tellnums WHERE id = (?)");
@@ -479,7 +478,7 @@ app.get("/tellnums/delete/:deleteId", (req, res) => {
 
 
 //Ordersテーブルの追加・更新
-app.get("/orders/update/:ordersUpdateArray", (req, res) => {
+app.get("/orders/update/:ordersUpdateArray", isAuthenticated, (req, res) => {
   const ordersUpdateArray = req.params.ordersUpdateArray;
   const array = ordersUpdateArray.split(',');
   for (let h = 0; h < (array.length/6); h++) {
