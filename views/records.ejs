@@ -13,7 +13,7 @@
     />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />    
     <!-- bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
@@ -245,7 +245,7 @@
       }
       
       
-      //recordsでOrdersの反映      
+      //★recordsでOrdersの反映      
       function getOrdersData(id, date, user, store, menu, price, change) {
         const parent = document.getElementById("orderFormArea");
         const tr = document.createElement("tr");
@@ -282,7 +282,7 @@
         const td_8 = document.createElement("td");
           td_8.className = "px-1";
         const input_8 = document.createElement("input");
-          input_8.onclick = deleteOrder; //関数をプロパティとして追加する場合は（）は不要
+          input_8.onclick =() =>  this.deleteOrder(id);
           input_8.className = "form-control btn-outline-secondary px-0";
           input_8.type = "button";
           input_8.name = `deleteOrderBtn_${id}`;
@@ -310,16 +310,16 @@
       };
 
       
-      //デリートにチェックされたidの取得
-      function deleteOrder() {
-        const activeDeleteOrderBtn = document.activeElement;
-        const deleteId = activeDeleteOrderBtn.name.replace("deleteOrderBtn_", "");
+      //★デリートにチェックされたidの取得
+      function deleteOrder(id) {
+        console.log(id);
+        // const activeDeleteOrderBtn = document.activeElement; //safariだとactiveElement（フォーカスされている要素）が取得できなかった。
+        // const deleteId = activeDeleteOrderBtn.name.replace("deleteOrderBtn_", ""); //id
+        // console.log(activeDeleteOrderBtn.name.replace("deleteOrderBtn_", ""));
         const result = window.confirm("削除しますか？");
-        console.log(activeDeleteOrderBtn.name);
-        console.log(activeDeleteOrderBtn.name.replace("deleteOrderBtn_", ""));
         if (result) {
-          window.location.href = `/orders/delete/${deleteId}`;
-        }
+          window.location.href = `/orders/delete/${id}`;
+        }         
       };
       
     </script>

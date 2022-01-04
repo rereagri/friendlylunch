@@ -177,7 +177,7 @@
         });
 
       
-      //editページでUsersの反映
+      //★editページでUsersの反映
       function getUsersData(id, user, refNum) {
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
@@ -205,7 +205,8 @@
           input_3.value = user;
         const td_4 = document.createElement("td");
         const input_4 = document.createElement("input");
-          input_4.onclick = deleteUser;　//関数をプロパティとして追加する場合は（）は不要
+          // input_4.onclick = deleteUser;　//関数をプロパティとして追加する場合は（）は不要
+          input_4.onclick =() =>  this.deleteUser(id);
           input_4.className = "form-control btn btn-outline-secondary";
           input_4.type = "button";
           input_4.name = `deleteUserBtn_${id}`;
@@ -222,7 +223,7 @@
       };
       
       
-      //editでMenusの反映      
+      //★editでMenusの反映      
       function getMenusData(id, store, menu, price) {
         const parent = document.getElementById("menuFormArea");
         const tr = document.createElement("tr");
@@ -259,7 +260,8 @@
         const td_5 = document.createElement("td");
           td_5.className = "px-1";
         const input_5 = document.createElement("input");
-          input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
+          // input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
+          input_5.onclick =() =>  this.deleteMenu(id);
           input_5.className = "form-control btn-outline-secondary px-0";
           input_5.type = "button";
           input_5.name = `deleteMenuBtn_${id}`;
@@ -326,7 +328,7 @@
       };
       
       
-      //edit Users「行」追加
+      //★edit Users「行」追加
       function userRowAdd() {
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
@@ -341,7 +343,7 @@
           input_1.value = maxUserId();
         const td_2 = document.createElement("td");
         const input_2 = document.createElement("input");
-          input_2.className = "form-control refNum p-0 text-center";
+          input_2.className = "form-control refNum px-0 text-center";
           input_2.type = "text";
           input_2.name = "refNum";
           input_2.value = maxRefNum();
@@ -352,7 +354,8 @@
           input_3.name = "userName";
         const td_4 = document.createElement("td");
         const input_4 = document.createElement("input");
-          input_4.onclick = deleteUser; //関数をプロパティとして追加する場合は（）は不要
+          // input_4.onclick = deleteUser; //関数をプロパティとして追加する場合は（）は不要
+          input_4.onclick =() =>  this.deleteUser(`${input_1.value}`);
           input_4.className = "form-control btn btn-outline-secondary";
           input_4.type = "button";
           input_4.name = `deleteUserBtn_${input_1.value}`;
@@ -369,7 +372,7 @@
       };
       
       
-      //edit Menus「行」追加
+      //★edit Menus「行」追加
       function menuRowAdd() {
         const parent = document.getElementById("menuFormArea");
         const tr = document.createElement("tr");
@@ -403,6 +406,7 @@
         const td_5 = document.createElement("td");
         const input_5 = document.createElement("input");
           input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
+          input_4.onclick =() =>  this.deleteUser(`${input_1.value}`);
           input_5.className = "form-control btn-outline-secondary px-0";
           input_5.type = "button";
           input_5.name = `deleteMenuBtn_${input_1.value}`;
@@ -521,14 +525,14 @@
       
       
       //edit Users デリートにチェックされたidの取得
-      function deleteUser() {
-        const activeDeleteUserBtn = document.activeElement;
-        const deleteId = activeDeleteUserBtn.name.replace("deleteUserBtn_", "");
+      function deleteUser(id) {
+        // const activeDeleteUserBtn = document.activeElement;
+        // const deleteId = activeDeleteUserBtn.name.replace("deleteUserBtn_", "");
+        // console.log(activeDeleteUserBtn.name);
+        // console.log(activeDeleteUserBtn.name.replace("deleteUserBtn_", ""));
         const result = window.confirm("削除しますか？");
-        console.log(activeDeleteUserBtn.name);
-        console.log(activeDeleteUserBtn.name.replace("deleteUserBtn_", ""));
         if (result) {
-          window.location.href = `/users/delete/${deleteId}`;
+          window.location.href = `/users/delete/${id}`;
         }
       };
       
@@ -536,8 +540,9 @@
       //edit Menus デリートにチェックされたidの取得
       function deleteMenu() {
         const activeDeleteMenuBtn = document.activeElement;
-        const deleteId = activeDeleteMenuBtn.name.replace("deleteMenuBtn_", "");
+        // const deleteId = activeDeleteMenuBtn.name.replace("deleteMenuBtn_", "");
         const result = window.confirm("削除しますか？");
+        console.log(activeDeleteMenuBtn); //safariだとdocument.activeElementでフォーカスされた要素が取得されない。<body></boby>全体が取得されてしまう。
         console.log(activeDeleteMenuBtn.name);
         console.log(activeDeleteMenuBtn.name.replace("deleteMenuBtn_", ""));
         if (result) {
