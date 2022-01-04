@@ -245,7 +245,7 @@
       }
       
       
-      //★recordsでOrdersの反映      
+      //recordsでOrdersの反映      
       function getOrdersData(id, date, user, store, menu, price, change) {
         const parent = document.getElementById("orderFormArea");
         const tr = document.createElement("tr");
@@ -310,7 +310,7 @@
       };
 
       
-      //★デリートにチェックされたidの取得
+      //デリートにチェックされたidの取得
       function deleteOrder(id) {
         console.log(id);
         // const activeDeleteOrderBtn = document.activeElement; //safariだとactiveElement（フォーカスされている要素）が取得できなかった。

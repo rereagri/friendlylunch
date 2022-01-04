@@ -177,7 +177,7 @@
         });
 
       
-      //★editページでUsersの反映
+      //editページでUsersの反映
       function getUsersData(id, user, refNum) {
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
@@ -223,7 +223,7 @@
       };
       
       
-      //★editでMenusの反映      
+      //editでMenusの反映      
       function getMenusData(id, store, menu, price) {
         const parent = document.getElementById("menuFormArea");
         const tr = document.createElement("tr");
@@ -311,7 +311,8 @@
         const td_4 = document.createElement("td");
           td_4.className = "px-1";
         const input_4 = document.createElement("input");
-          input_4.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
+          // input_4.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
+          input_4.onclick =() =>  this.deleteTellnum(id);
           input_4.className = "form-control btn btn-outline-secondary";
           input_4.type = "button";
           input_4.name = `deleteTellnumBtn_${id}`;
@@ -328,7 +329,7 @@
       };
       
       
-      //★edit Users「行」追加
+      //edit Users「行」追加
       function userRowAdd() {
         const parent = document.getElementById("nameFormArea");
         const tr = document.createElement("tr");
@@ -372,7 +373,7 @@
       };
       
       
-      //★edit Menus「行」追加
+      //edit Menus「行」追加
       function menuRowAdd() {
         const parent = document.getElementById("menuFormArea");
         const tr = document.createElement("tr");
@@ -405,8 +406,8 @@
           input_4.name = "menuPrice";
         const td_5 = document.createElement("td");
         const input_5 = document.createElement("input");
-          input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
-          input_4.onclick =() =>  this.deleteUser(`${input_1.value}`);
+          // input_5.onclick = deleteMenu; //関数をプロパティとして追加する場合は（）は不要
+          input_5.onclick =() =>  this.deleteMenu(`${input_1.value}`);
           input_5.className = "form-control btn-outline-secondary px-0";
           input_5.type = "button";
           input_5.name = `deleteMenuBtn_${input_1.value}`;
@@ -455,7 +456,8 @@
         const td_4 = document.createElement("td");
           td_4.className = "px-1";
         const input_4 = document.createElement("input");
-          input_4.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
+          // input_4.onclick = deleteTellnum;　//関数をプロパティとして追加する場合は（）は不要
+          input_4.onclick =() =>  this.deleteTellnum(`${input_1.value}`);
           input_4.className = "form-control btn btn-outline-secondary";
           input_4.type = "button";
           input_4.name = `deleteTellnumBtn_${input_1.value}`;
@@ -524,7 +526,7 @@
       };
       
       
-      //edit Users デリートにチェックされたidの取得
+      //edit Users デリートにチェックされたidの取得とサーバーへの送信
       function deleteUser(id) {
         // const activeDeleteUserBtn = document.activeElement;
         // const deleteId = activeDeleteUserBtn.name.replace("deleteUserBtn_", "");
@@ -537,29 +539,29 @@
       };
       
       
-      //edit Menus デリートにチェックされたidの取得
-      function deleteMenu() {
-        const activeDeleteMenuBtn = document.activeElement;
+      //edit Menus デリートにチェックされたidの取得とサーバーへの送信
+      function deleteMenu(id) {
+        // const activeDeleteMenuBtn = document.activeElement; //safariだとdocument.activeElementでフォーカスされた要素が取得されない。<body></boby>全体が取得されてしまう。
         // const deleteId = activeDeleteMenuBtn.name.replace("deleteMenuBtn_", "");
+        // console.log(activeDeleteMenuBtn);
+        // console.log(activeDeleteMenuBtn.name);
+        // console.log(activeDeleteMenuBtn.name.replace("deleteMenuBtn_", ""));
         const result = window.confirm("削除しますか？");
-        console.log(activeDeleteMenuBtn); //safariだとdocument.activeElementでフォーカスされた要素が取得されない。<body></boby>全体が取得されてしまう。
-        console.log(activeDeleteMenuBtn.name);
-        console.log(activeDeleteMenuBtn.name.replace("deleteMenuBtn_", ""));
         if (result) {
-          window.location.href = `/menus/delete/${deleteId}`;
+          window.location.href = `/menus/delete/${id}`;
         }
       };
       
       
-      //edit Tellnums デリートにチェックされたidの取得
-      function deleteTellnum() {
-        const activeDeleteTellnumBtn = document.activeElement;
-        const deleteId = activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", "");
+      //edit Tellnums デリートにチェックされたidの取得とサーバーへの送信
+      function deleteTellnum(id) {
+        // const activeDeleteTellnumBtn = document.activeElement;
+        // const deleteId = activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", "");
+        // console.log(activeDeleteTellnumBtn.name);
+        // console.log(activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", ""));
         const result = window.confirm("削除しますか？");
-        console.log(activeDeleteTellnumBtn.name);
-        console.log(activeDeleteTellnumBtn.name.replace("deleteTellnumBtn_", ""));
         if (result) {
-          window.location.href = `/tellnums/delete/${deleteId}`;
+          window.location.href = `/tellnums/delete/${id}`;
         }
       };
       
