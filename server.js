@@ -58,8 +58,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //テンプレートエンジン
-app.set('views', './views');
 app.set('view engine', 'ejs');
+app.set('views', './views');
 
 // dotenv
 require('dotenv').config();
@@ -135,7 +135,7 @@ db.serialize(() => {
     console.log("New table Tellnums created!")
     db.serialize(() => {
       db.run(
-        'INSERT INTO Users (user) VALUES ("ユーザー1"), ("ユーザー2"), ("ユーザー3")'
+        'INSERT INTO Users (id, user) VALUES ("1", "ユーザー1"), ("2", "ユーザー2"), ("3", "ユーザー3")'
       );
     });
     db.serialize(() => {
