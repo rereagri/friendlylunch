@@ -181,7 +181,7 @@ db.serialize(() => {
 
 // ログインページへの遷移
 app.get("/", (req, res) => {
-  res.render(`${__dirname}/views/login.ejs`);
+  res.render(`${__dirname}/views/index.ejs`);
 });
 
 //ログイン認証
@@ -198,24 +198,24 @@ app.post('/users/authentication',
 //ログイン失敗
 app.get('/users/failure', (req, res) => {
   console.log(req.session);
-  res.render(`${__dirname}/views/login.ejs`, { message: req.flash( "error" ), login_people: req.user});
+  res.render(`${__dirname}/views/index.ejs`, { message: req.flash( "error" ), login_people: req.user});
 });
 
 //申請側 ログイン成功
 app.get('/users/success', (req, res) => {
   console.log(req.session);
-  res.render(`${__dirname}/views/index.ejs`);
+  res.render(`${__dirname}/views/main.ejs`);
 });
 
 //ログアウト
 app.get('/logout', isAuthenticated, (req, res) => {
   req.session.passport.user = undefined;
-  res.render(`${__dirname}/views/login.ejs`);
+  res.render(`${__dirname}/views/index.ejs`);
 });
 
 // インデックスページへの遷移
-app.get("/index", isAuthenticated, (req, res) => {
-  res.render(`${__dirname}/views/index.ejs`, { login_people: req.user });
+app.get("/main", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/main.ejs`, { login_people: req.user });
 });
 
 
@@ -432,7 +432,7 @@ app.post("/orders/check", isAuthenticated, (req, res) => {
       stmt.finalize();
     }
   }
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
@@ -448,7 +448,7 @@ app.get("/orders/check/reset", isAuthenticated, (req, res) => {
       stmt.finalize();
     }
   });
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
@@ -555,7 +555,7 @@ app.get("/orders/update/:ordersUpdateArray", isAuthenticated, (req, res) => {
     stmt.run();
     stmt.finalize();
   }
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
