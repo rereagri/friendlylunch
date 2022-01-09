@@ -1,7 +1,7 @@
 console.log("hello world");
 
 
-//indexページでUsersデータを呼び出し
+//mainページでUsersデータを呼び出し
 async function fetchGetUsersData () {
   fetch("/getUsersData", {})
     .then(res => res.json())
@@ -13,7 +13,7 @@ async function fetchGetUsersData () {
 };
 
 
-//indexページでmenusデータを呼び出し
+//mainページでmenusデータを呼び出し
 async function fetchGetMenusData () {
   fetch("/getMenusData", {})
     .then(res => res.json())
@@ -25,7 +25,7 @@ async function fetchGetMenusData () {
 };
 
 
-//Ordersデータの呼び出し 当日の集計用
+//mainページでOrdersデータの呼び出し 当日の集計用
 async function fetchGetTodaysOrders () {
   fetch("/getTodaysOrders", {})
     .then(res => res.json())
@@ -53,19 +53,7 @@ async function fetchGetTodaysOrders () {
 };
 
 
-//indexページでTellnumsデータを呼び出し
-async function fetchGetTellnumsData () {
-  fetch("/getTellnumsData", {})
-    .then(res => res.json())
-    .then(response => {
-      response.forEach(row => {
-        appendTellnums(row.store, row.tellnumsText);
-      });
-    });
-};
-
-
-//注文済みuserのトランスフォーム
+//mainページでOrdersから注文済みuserの呼び出し
 async function fetchOrderedUsers () {
   fetch("/getTodaysOrders", {})
     .then(res => res.json())
@@ -77,7 +65,31 @@ async function fetchOrderedUsers () {
 };
 
 
-fetchGetUsersData().then(fetchGetMenusData()).then(fetchGetTodaysOrders()).then(fetchOrderedUsers()).then(fetchGetTellnumsData());
+//mainページでUsersから当面注文不要のuserの呼び出し
+async function fetchUnnecessaryUsers () {
+  fetch("/getUnnecessaryUsers", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendUnnecessaryUserTransform(row.user);
+      });
+    });
+};
+
+
+//mainページでTellnumsデータの呼び出し
+async function fetchGetTellnumsData () {
+  fetch("/getTellnumsData", {})
+    .then(res => res.json())
+    .then(response => {
+      response.forEach(row => {
+        appendTellnums(row.store, row.tellnumsText);
+      });
+    });
+};
+
+
+fetchGetUsersData().then(fetchGetMenusData()).then(fetchGetTodaysOrders()).then(fetchOrderedUsers()).then(fetchUnnecessaryUsers()).then(fetchGetTellnumsData());
 
 
 //enter押しでsubmitしないようにする。
@@ -107,7 +119,7 @@ const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
 
-//indexページ Usersデータ反映 チェックボックス
+//mainページ Usersデータ反映 チェックボックス
 const appendUserRadio = (id, user) => {
   // console.log(id, user);
   const parent = document.getElementById("usersArea");
@@ -137,7 +149,7 @@ const appendUserRadio = (id, user) => {
 }
 
 
-// indexページ Menusデータ反映 アコーディオン　ヘッダー
+// mainページ Menusデータ反映 アコーディオン　ヘッダー
 const appendMenuAccordionHeader = (id, store, menu, price) => {
   const parent_menuArea = document.getElementById("menusArea");
   const div1_accordionItem = document.createElement("div");
@@ -342,6 +354,25 @@ const appendOrderedUserTransform = (user) => {
 };
 
 
+//当面注文不要の人の要素を変更（取り消し線を引く、文字色を薄くするなど）
+const appendUnnecessaryUserTransform = (user) => {
+  const selectUserName = document.getElementsByClassName("selectUserName");
+  const userLabel = document.getElementsByClassName("userLabel");
+  const selectUserBadge = document.getElementsByClassName("selectUserBadge");
+    for (let i = 0; i < userLabel.length; i++) {
+      if (user == userLabel[i].innerText) { //注文したuserに取り消し線など
+        selectUserName[i].disabled = "disabled";
+        userLabel[i].className = "form-check-label userLabel mx-4 orderedUser text-decoration-line-through text-secondary";
+        // console.log(selectUserBadge[i]); //<input class="selectUserBadge ・・・ value="注文なし" ・・・ >
+        selectUserBadge[i].className = "selectUserBadge border-0 bg-secondary rounded text-white text-center";
+        selectUserBadge[i].onclick = "";
+        selectUserBadge[i].style = "cursor: default";
+        selectUserBadge[i].value = "当面不要";
+      }
+    }
+};
+
+
 //本日の集計　お釣り
 const appendTodaysChanges = (id, user, change, changed_check) => {
   const parent = document.getElementById("appendTodaysChangesArea");
@@ -401,7 +432,7 @@ const ordersResetBtn = document.getElementById("ordersResetBtn");
   });
 
 
-//indexページ Tellnumsデータ反映 集計場所に電話番号記述
+//mainページ Tellnumsデータ反映 集計場所に電話番号記述
 const appendTellnums = (store, tellnumsText) => {
   const eachStoreName = document.getElementsByClassName("eachStoreName"); //HTMLCollection。そのままでは要素を扱えない。for文を使う。
   const tellnumArea = document.getElementsByClassName("tellnumArea");

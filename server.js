@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+// const html = require('html');
 
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy;
@@ -58,29 +59,45 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //テンプレートエンジン
-app.set('views', './views');
 app.set('view engine', 'ejs');
+app.set('views', './views');
+
 
 // dotenv
 require('dotenv').config();
 
 
-// passport
+// ★★★passport
+// 簡略系
 passport.use(
   'users-local',
   new LocalStrategy(
   (username, password, done) => {
-    if (username !== process.env.KEY1){
-      // Error
-      return done(null, false, { message : 'ユーザーネームに誤りがあります' });
-    } else if(password !== process.env.KEY2) {
-      // Error
-      return done(null, false, { message : 'パスワードに誤りがあります。' });
-    } else{
-      // Success and return user information.
+    if (password == process.env.KEY2 || password == process.env.KEY3 || password == process.env.KEY4 || password == process.env.KEY5){
+      // Success
       return done(null, { username: username, password: password});
-    }
+    } else {
+      // Error
+      return done(null, false, { message : 'アカウントorパスワードに誤りがあります。' });
+    } 
   }));
+
+// 本来
+// passport.use(
+//   'users-local',
+//   new LocalStrategy(
+//   (username, password, done) => {
+//     if (username !== process.env.KEY1){
+//       // Error
+//       return done(null, false, { message : 'ユーザーネームに誤りがあります' });
+//     } else if (password !== process.env.KEY2) {
+//       // Error
+//       return done(null, false, { message : 'パスワードに誤りがあります。' });
+//     } else {
+//       // Success and return user information.
+//       return done(null, { username: username, password: password});
+//     }
+//   }));
 
 //passport セッション管理 passportがユーザー情報をシリアライズすると呼び出される
 passport.serializeUser((user, done) => {
@@ -94,7 +111,7 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-//passport ログインしていないと（isAuthenticatedがないと）そのページに遷移できない
+//★★★passport ログインしていないと（isAuthenticatedがないと）そのページに遷移できない
 function isAuthenticated(req, res, next) {
   const auth = req.isAuthenticated();
   if (auth !== true) {
@@ -103,8 +120,8 @@ function isAuthenticated(req, res, next) {
   } else {
     const auth = req.isAuthenticated();
     console.log(auth);
-    const userName = process.env.KEY1;
-    if(userName == null) {
+    const userName1 = process.env.KEY1;
+    if(userName1 == null) {
       // res.send('ログインしてください');
       res.redirect("/");
     } else {
@@ -117,7 +134,7 @@ function isAuthenticated(req, res, next) {
 db.serialize(() => {
   if (!exists) {
     db.run(
-      "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, refNum INTEGER)"
+      "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, refNum INTEGER, notForTheTimeBeing INTEGER)"
     );
     console.log("New table Users created!"); 
     db.run(
@@ -135,7 +152,7 @@ db.serialize(() => {
     console.log("New table Tellnums created!")
     db.serialize(() => {
       db.run(
-        'INSERT INTO Users (user) VALUES ("ユーザー1"), ("ユーザー2"), ("ユーザー3")'
+        'INSERT INTO Users (id, user) VALUES ("1", "ユーザー1"), ("2", "ユーザー2"), ("3", "ユーザー3")'
       );
     });
     db.serialize(() => {
@@ -164,7 +181,7 @@ db.serialize(() => {
 
 // ログインページへの遷移
 app.get("/", (req, res) => {
-  res.render(`${__dirname}/views/login.ejs`);
+  res.render(`${__dirname}/views/index.ejs`);
 });
 
 //ログイン認証
@@ -181,24 +198,24 @@ app.post('/users/authentication',
 //ログイン失敗
 app.get('/users/failure', (req, res) => {
   console.log(req.session);
-  res.render(`${__dirname}/views/login.ejs`, { message: req.flash( "error" ), login_people: req.user});
+  res.render(`${__dirname}/views/index.ejs`, { message: req.flash( "error" ), login_people: req.user});
 });
 
 //申請側 ログイン成功
 app.get('/users/success', (req, res) => {
   console.log(req.session);
-  res.render(`${__dirname}/views/index.ejs`);
+  res.render(`${__dirname}/views/main.ejs`);
 });
 
 //ログアウト
 app.get('/logout', isAuthenticated, (req, res) => {
   req.session.passport.user = undefined;
-  res.render(`${__dirname}/views/login.ejs`);
+  res.render(`${__dirname}/views/index.ejs`);
 });
 
 // インデックスページへの遷移
-app.get("/index", isAuthenticated, (req, res) => {
-  res.render(`${__dirname}/views/index.ejs`, { login_people: req.user });
+app.get("/main", isAuthenticated, (req, res) => {
+  res.render(`${__dirname}/views/main.ejs`, { login_people: req.user });
 });
 
 
@@ -220,12 +237,21 @@ app.get("/recordsAllDelete", isAuthenticated, (req, res) => {
 });
 
 
-//サーバーサイドからフロントエンドへUserデータを送付
+//サーバーサイドからフロントエンドへUsersデータを送付
 app.get("/getUsersData", isAuthenticated, (request, response) => {
   db.all("SELECT * from Users ORDER by refNum ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
+
+
+//サーバーサイドからフロントエンドへUsersデータ（当面不要のuser)を送付
+app.get("/getUnnecessaryUsers", isAuthenticated, (request, response) => {
+  db.all("SELECT * from Users WHERE notForTheTimeBeing = '1' ORDER by refNum ASC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
 
 //サーバーサイドからフロントエンドへMenusデータを送付
 app.get("/getMenusData", isAuthenticated, (request, response) => {
@@ -266,7 +292,7 @@ app.get("/getOrdersData/:userName/:pageNum", isAuthenticated, (request, response
 });
 
 
-//サーバーサイドからフロントエンドへOrdersのuserデータを送付。セレクトボックス用。
+//サーバーサイドからフロントエンドへOrdersのuserデータを送付。records.ejsのセレクトボックス用。
 app.get("/getOrdersUserData/forSelectBox", isAuthenticated, (request, response) => {
   db.all("SELECT DISTINCT user from Orders ORDER by user ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
@@ -305,6 +331,7 @@ app.get("/getTodaysOrders", isAuthenticated, (request, response) => {
   });
 });
 
+
 // 本日のお釣り user change
 app.get("/getTodaysChanges", isAuthenticated, (request, response) => {
   db.all("SELECT id, user, change, changed_check from Orders WHERE date = '"+thisDay+"' and change is not '' ORDER by user ASC", (err, rows) => {
@@ -325,8 +352,9 @@ app.post("/users/addEdit", isAuthenticated, (req, res) => {
   const getUserId = req.body.userId;
   const getUserName = req.body.userName;
   const getRefNum = req.body.refNum;
+  const getNotForTheTimeBeing = req.body.notForTheTimeBeing;
   for(let i = 0; i < getUserId.length; i++) {
-    const stmt = db.prepare("INSERT OR REPLACE INTO Users (id, user, refNum) VALUES (?, ?, ?)", getUserId[i], getUserName[i], getRefNum[i]);
+    const stmt = db.prepare("INSERT OR REPLACE INTO Users (id, user, refNum, notForTheTimeBeing) VALUES (?, ?, ?, ?)", getUserId[i], getUserName[i], getRefNum[i], getNotForTheTimeBeing[i]);
     stmt.run();
     stmt.finalize();
   }
@@ -404,7 +432,7 @@ app.post("/orders/check", isAuthenticated, (req, res) => {
       stmt.finalize();
     }
   }
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
@@ -420,7 +448,7 @@ app.get("/orders/check/reset", isAuthenticated, (req, res) => {
       stmt.finalize();
     }
   });
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
@@ -527,7 +555,7 @@ app.get("/orders/update/:ordersUpdateArray", isAuthenticated, (req, res) => {
     stmt.run();
     stmt.finalize();
   }
-  res.redirect("/index");
+  res.redirect("/main");
 });
 
 
