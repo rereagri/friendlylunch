@@ -1,7 +1,7 @@
 console.log("hello world");
 
 
-//mainページでUsersデータを呼び出し
+//indexページでUsersデータを呼び出し
 async function fetchGetUsersData () {
   fetch("/getUsersData", {})
     .then(res => res.json())
@@ -13,7 +13,7 @@ async function fetchGetUsersData () {
 };
 
 
-//mainページでmenusデータを呼び出し
+//indexページでmenusデータを呼び出し
 async function fetchGetMenusData () {
   fetch("/getMenusData", {})
     .then(res => res.json())
@@ -25,7 +25,7 @@ async function fetchGetMenusData () {
 };
 
 
-//mainページでOrdersデータの呼び出し 当日の集計用
+//indexページでOrdersデータの呼び出し 当日の集計用
 async function fetchGetTodaysOrders () {
   fetch("/getTodaysOrders", {})
     .then(res => res.json())
@@ -53,7 +53,7 @@ async function fetchGetTodaysOrders () {
 };
 
 
-//mainページでOrdersから注文済みuserの呼び出し
+//indexページでOrdersから注文済みuserの呼び出し
 async function fetchOrderedUsers () {
   fetch("/getTodaysOrders", {})
     .then(res => res.json())
@@ -65,7 +65,7 @@ async function fetchOrderedUsers () {
 };
 
 
-//mainページでUsersから当面注文不要のuserの呼び出し
+//indexページでUsersから当面注文不要のuserの呼び出し
 async function fetchUnnecessaryUsers () {
   fetch("/getUnnecessaryUsers", {})
     .then(res => res.json())
@@ -77,7 +77,7 @@ async function fetchUnnecessaryUsers () {
 };
 
 
-//mainページでTellnumsデータの呼び出し
+//indexページでTellnumsデータの呼び出し
 async function fetchGetTellnumsData () {
   fetch("/getTellnumsData", {})
     .then(res => res.json())
@@ -119,7 +119,7 @@ const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
 
-//mainページ Usersデータ反映 チェックボックス
+//indexページ Usersデータ反映 チェックボックス
 const appendUserRadio = (id, user) => {
   // console.log(id, user);
   const parent = document.getElementById("usersArea");
@@ -149,7 +149,7 @@ const appendUserRadio = (id, user) => {
 }
 
 
-// mainページ Menusデータ反映 アコーディオン　ヘッダー
+// indexページ Menusデータ反映 アコーディオン　ヘッダー
 const appendMenuAccordionHeader = (id, store, menu, price) => {
   const parent_menuArea = document.getElementById("menusArea");
   const div1_accordionItem = document.createElement("div");
@@ -432,7 +432,7 @@ const ordersResetBtn = document.getElementById("ordersResetBtn");
   });
 
 
-//mainページ Tellnumsデータ反映 集計場所に電話番号記述
+//indexページ Tellnumsデータ反映 集計場所に電話番号記述
 const appendTellnums = (store, tellnumsText) => {
   const eachStoreName = document.getElementsByClassName("eachStoreName"); //HTMLCollection。そのままでは要素を扱えない。for文を使う。
   const tellnumArea = document.getElementsByClassName("tellnumArea");

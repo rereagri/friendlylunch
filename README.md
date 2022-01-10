@@ -8,7 +8,7 @@ A starter that has a database
 
 On the front-end,
 
-- Edit `views/main.ejs`,  `public/style.css`, and `public/client.js` etc
+- Edit `views/index.ejs`,  `public/style.css`, and `public/client.js` etc
 - Drag in `assets`, like images or music, to add them to your project
 
 On the back-end,
