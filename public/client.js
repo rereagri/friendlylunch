@@ -114,7 +114,7 @@ const week_ja = new Array("日", "月", "火", "水", "木", "金", "土");
 //年・月・日・曜日を書き出す
 document.getElementById("todayDate").textContent =　year + "年" + month + "月" + day + "日 " + week_ja[week] + "曜日";
 document.getElementById("todayTime").textContent = hour + "時" + minute + "分";
-document.getElementById("todayDate2").textContent =　"本日" + month + "月" + day + "日 " + "の当番用";
+document.getElementById("todayDate2").textContent =　"本日" + month + "月" + day + "日 " + "の【当番用】";
 const thisDay = year + "-" + month + "-" + day;
 console.log(thisDay);
 
@@ -258,11 +258,15 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     tr_store.className = `ordered_${store}`;
   const th_store = document.createElement("th");
     th_store.innerText = store;
-    th_store.className = "font-weight-bold eachStoreName";
+    th_store.className = "font-weight-bold eachStoreName bg-light";
   const th_tellnum = document.createElement("th");
-    th_tellnum.className = "tellnumArea";
-    th_tellnum.colSpan = "3";
+    th_tellnum.className = "tellnumArea bg-light";
+    th_tellnum.colSpan = "2";
     th_tellnum.innerText = "";
+  const th_check = document.createElement("th");
+    th_check.colspan = "1";
+    th_check.className = "bg-light"
+    th_check.innerText = "check";
   const tr_order = document.createElement("tr");
     tr_order.className = `ordered_${store}_${user}`;
   const td_id = document.createElement("td");
@@ -301,6 +305,7 @@ const appendTodaysOrders = (id, store, user, menu, price, ordered_check) => {
     parent.appendChild(tr_store);
     tr_store.append(th_store);
     tr_store.append(th_tellnum);
+    tr_store.append(th_check);
     parent.appendChild(tr_order);
     tr_order.append(td_id);
     tr_order.append(td_user);
